@@ -1,0 +1,13 @@
+<resources>
+
+    <string name="app_name">HueTest</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">HueTest</string>
+    <string name="lampTab">Lamp Tab</string>
+    <string name="menu_discover">discover bridge</string>
+    <string name="remote_service_started">service started</string>
+    <string name="remote_service_stopped">service stopped</string>
+    <string name="remote_service_label">AnLight Service</string>
+
+</resources>

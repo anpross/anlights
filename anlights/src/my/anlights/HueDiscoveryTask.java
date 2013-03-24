@@ -1,4 +1,4 @@
-package anlights;
+package my.anlights;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +10,9 @@ import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import my.anlights.data.HueBridge;
+import my.anlights.data.SsdpDevice;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -24,8 +27,6 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import anlights.data.HueBridge;
-import anlights.data.SsdpDevice;
 
 /**
  * to debug using wireshark, use filter "udp.port eq 1900"

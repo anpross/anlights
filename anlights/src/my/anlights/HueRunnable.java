@@ -1,6 +1,14 @@
-package anlights;
+package my.anlights;
 
 import java.io.IOException;
+
+import my.anlights.data.HueLight;
+import my.anlights.data.HueLightNamesMessage;
+import my.anlights.data.HueMessage;
+import my.anlights.data.HueReadStateMessage;
+import my.anlights.data.HueState;
+import my.anlights.data.HueWriteStateMessage;
+import my.anlights.util.ParserHelper;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -13,13 +21,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
-import anlights.data.HueLight;
-import anlights.data.HueLightNamesMessage;
-import anlights.data.HueMessage;
-import anlights.data.HueReadStateMessage;
-import anlights.data.HueState;
-import anlights.data.HueWriteStateMessage;
-import anlights.util.ParserHelper;
 
 public class HueRunnable implements Runnable {
 

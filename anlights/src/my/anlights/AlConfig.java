@@ -1,4 +1,4 @@
-package anlights;
+package my.anlights;
 
 import android.content.Context;
 import android.content.SharedPreferences;

@@ -1,4 +1,4 @@
-package anlights;
+package my.anlights;
 
 import java.util.ArrayList;
 

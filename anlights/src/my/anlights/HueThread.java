@@ -1,13 +1,14 @@
-package anlights;
+package my.anlights;
 
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import my.anlights.data.HueMessage;
+
 import org.json.JSONObject;
 
 import android.util.Log;
-import anlights.data.HueMessage;
 
 public class HueThread {
 

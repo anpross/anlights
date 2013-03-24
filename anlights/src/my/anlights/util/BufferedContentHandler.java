@@ -4,7 +4,7 @@
  * TODO To change the template for this generated file go to
  * Window - Preferences - Java - Code Style - Code Templates
  */
-package anlights.util;
+package my.anlights.util;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

@@ -1,4 +1,4 @@
-package anlights.servicetest;
+package my.anlights.servicetest;
 
 import java.util.ArrayList;
 import java.util.List;

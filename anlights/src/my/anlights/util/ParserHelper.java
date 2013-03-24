@@ -1,4 +1,4 @@
-package anlights.util;
+package my.anlights.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;

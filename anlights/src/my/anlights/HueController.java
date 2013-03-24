@@ -1,6 +1,9 @@
-package anlights;
+package my.anlights;
 
 import java.io.IOException;
+
+import my.anlights.data.HueBridge;
+import my.anlights.util.ParserHelper;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -15,8 +18,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
-import anlights.data.HueBridge;
-import anlights.util.ParserHelper;
 
 public class HueController {
 

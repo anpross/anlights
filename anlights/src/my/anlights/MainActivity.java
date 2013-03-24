@@ -1,8 +1,13 @@
-package anlights;
+package my.anlights;
 
 import java.util.List;
 
 import my.anlights.R;
+import my.anlights.data.HueBridge;
+import my.anlights.data.HueGroup;
+import my.anlights.data.HueLight;
+import my.anlights.data.HueState;
+import my.anlights.servicetest.LocalWordService;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -19,11 +24,6 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-import anlights.data.HueBridge;
-import anlights.data.HueGroup;
-import anlights.data.HueLight;
-import anlights.data.HueState;
-import anlights.servicetest.LocalWordService;
 
 public class MainActivity extends Activity implements CallbackListener, OnClickListener, OnSeekBarChangeListener {
 

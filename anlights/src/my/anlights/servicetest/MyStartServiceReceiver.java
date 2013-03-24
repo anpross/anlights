@@ -1,4 +1,4 @@
-package anlights.servicetest;
+package my.anlights.servicetest;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

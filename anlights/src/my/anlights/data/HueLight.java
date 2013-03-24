@@ -1,11 +1,12 @@
-package anlights.data;
+package my.anlights.data;
+
+import my.anlights.Constants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
 import android.util.Log;
-import anlights.Constants;
 
 
 public class HueLight {

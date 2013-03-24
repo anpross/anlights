@@ -1,4 +1,4 @@
-package anlights.gui;
+package my.anlights.gui;
 
 import my.anlights.R;
 import android.app.Fragment;

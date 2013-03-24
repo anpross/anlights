@@ -1,4 +1,4 @@
-package anlights.data;
+package my.anlights.data;
 
 public class HueError {
 

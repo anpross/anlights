@@ -1,16 +1,17 @@
-package anlights.data;
+package my.anlights.data;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import my.anlights.AlConfig;
+import my.anlights.CallbackListener;
+import my.anlights.HueController;
+import my.anlights.HueThread;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import anlights.AlConfig;
-import anlights.CallbackListener;
-import anlights.HueController;
-import anlights.HueThread;
 
 
 public class HueBridge implements CallbackListener{

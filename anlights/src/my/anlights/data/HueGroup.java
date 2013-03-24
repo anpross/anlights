@@ -1,4 +1,4 @@
-package anlights.data;
+package my.anlights.data;
 
 import java.util.LinkedList;
 import java.util.List;

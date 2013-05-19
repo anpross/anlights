@@ -35,6 +35,7 @@ public class HueBridge implements CallbackListener{
 		this.isSupported = isSupported;
 		this.udn = udn;
 		this.urlBase = urlBase;
+        this.user = config.getBridgeUser();
 	}
 
 	public boolean isSupported() {
@@ -58,7 +59,7 @@ public class HueBridge implements CallbackListener{
 	
 	public List<HueLight> getLightNames() {
 
-//		readConfig();
+		readConfig();
 		HueLightNamesMessage message = new HueLightNamesMessage();
 		
 		t.pushMessage(message); // replace this with EmptyCallbackListenerObj

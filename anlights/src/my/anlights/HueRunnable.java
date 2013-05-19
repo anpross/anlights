@@ -24,7 +24,7 @@ import android.util.Log;
 
 public class HueRunnable implements Runnable {
 
-	private static final String TAG = Constants.LOGGING_TAG;
+    private static final String TAG = Constants.LOGGING_TAG;
 
 
 	
@@ -101,6 +101,8 @@ public class HueRunnable implements Runnable {
 		}
 		HttpGet get = new HttpGet(url);
 		try {
+            // java.lang.IllegalStateException: Target host must not be null, or set in parameters. scheme=null, host=null, path=nullapi/anlight123/lights
+            // only on first run when there is no host in config and discovery task did not yet get a response
 			HttpResponse response = httpClient.execute(get);
 			int retCode = response.getStatusLine().getStatusCode();
 			if(retCode == HttpStatus.SC_OK){

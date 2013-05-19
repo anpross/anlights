@@ -2,6 +2,7 @@ package my.anlights;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -82,8 +83,13 @@ public class HueDiscoveryTask extends AsyncTask<Void, Void, HueBridge> {
 				
 		if(hue == null){
 			Log.d(TAG,"  not found at old location, running ssdp discovery");
-			String newLocation = doSsdpDiscovery();
-			Log.d(TAG,"  found bridge at:"+newLocation);
+            String newLocation = null;
+            try {
+                newLocation = doSsdpDiscovery();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG,"  found bridge at:"+newLocation);
 			AlConfig.getExistingInstance().setLastBridgeLocation(newLocation);
 			if(newLocation != null){
 				hue = readDescriptionXml(newLocation);
@@ -98,10 +104,9 @@ public class HueDiscoveryTask extends AsyncTask<Void, Void, HueBridge> {
 		return hue;
 	}
 	
-	private String doSsdpDiscovery(){
+	private String doSsdpDiscovery() throws Exception{
 		SsdpDevice bridge = null;
-		String location = null;		
-		try {
+		String location = null;
 			final DatagramSocket socket = new DatagramSocket(DISCOVERY_PORT);
 			final DatagramPacket reply;
 			final byte[] replyBuffer;
@@ -129,13 +134,7 @@ public class HueDiscoveryTask extends AsyncTask<Void, Void, HueBridge> {
 				socket.close();
 			}
 			
-		} catch (SocketException e) {
-			Log.e(TAG,"problem discovering hue",e);
-		} catch (UnknownHostException e) {
-			Log.e(TAG,"problem discovering hue",e);
-		} catch (IOException e) {
-			Log.e(TAG,"problem discovering hue",e);
-		}
+
 		return location;
 	}
 	
@@ -191,6 +190,9 @@ public class HueDiscoveryTask extends AsyncTask<Void, Void, HueBridge> {
 			retCode = response.getStatusLine().getStatusCode();
 			if(retCode == HttpStatus.SC_OK) {
 				InputStream isContent = response.getEntity().getContent();
+                InputStreamReader isr = new InputStreamReader(isContent);
+
+//                Log.d(TAG, convertStreamToString(isContent));
 				DescriptionHandler descHandler = new DescriptionHandler();
 				xmlReader.setContentHandler(descHandler);
 
@@ -209,7 +211,7 @@ public class HueDiscoveryTask extends AsyncTask<Void, Void, HueBridge> {
 		}
 		return new HueBridge(isSupported, udn, urlBase);
 	}
-	
+
 	private void initHttpClient() {
 		if(httpClient == null) {
 			httpClient = new DefaultHttpClient();			

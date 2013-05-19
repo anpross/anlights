@@ -1,5 +1,7 @@
 package my.anlights;
 
+import java.util.UUID;
+
 public class Constants {
 
 	public static final String LOGGING_TAG = "AnLight";
@@ -11,4 +13,7 @@ public class Constants {
 	public static final String[] COMPATIBLE_MODELS = {"Philips hue bridge 2012"};
 
 	public static final String APPLICATION_NAME = "AnLight Client";
+
+    public static final UUID PEBBLE_UUID = UUID.fromString("EC555866-504F-41C0-91E0-D7EA491F0FEA");
+    public static final String BRIDGE_USER = "anlight123";
 }

@@ -36,4 +36,10 @@
         android:layout_height="wrap_content"
         android:text="ToggleButton" />
 
+    <Button
+        android:id="@+id/onHelloPebble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="send message to pebble"></Button>
+
 </LinearLayout>

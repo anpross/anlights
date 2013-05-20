@@ -26,6 +26,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="my.anlights.UpdateHueActivity"
+                  android:theme="@android:style/Theme.NoDisplay">
+
+        </activity>
         <service
             android:name="my.anlights.servicetest.LocalWordService"
             android:icon="@drawable/ic_launcher"
@@ -38,6 +42,7 @@
         </receiver>
         <receiver android:name="my.anlights.servicetest.PebbleConnectionReceiver">
             <intent-filter>
+                <action android:name="com.getpebble.action.app.RECEIVE" />
                 <action android:name="com.getpebble.action.PEBBLE_CONNECTED"></action>
                 <action android:name="com.getpebble.action.PEBBLE_DISCONNECTED"></action>
             </intent-filter>

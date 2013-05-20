@@ -1,5 +1,7 @@
 package my.anlights.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import my.anlights.Constants;
 
 import org.json.JSONArray;
@@ -8,18 +10,18 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-public class HueState {
+public class HueState implements Parcelable {
 
-	private Boolean on;
-	private Integer bri;
-	private Integer hue;
-	private Integer sat;
-	private XY xy;
-	private Integer ct;
-	private String alert; //need possible values, convert to int then
-	private String effect; //need possible values, convert to int then
-	private int colorMode; //need possible values, convert to int then
-	private Boolean reachable;
+	private Boolean on = null;
+	private Integer bri = null;
+	private Integer hue = null;
+	private Integer sat = null;
+	private XY xy = null;
+	private Integer ct = null;
+	private String alert = null; //need possible values, convert to int then
+	private String effect = null; //need possible values, convert to int then
+	private int colorMode = 0; //need possible values, convert to int then
+	private Boolean reachable = null;
 	
 	private static final String TAG = Constants.LOGGING_TAG;
 	
@@ -30,7 +32,7 @@ public class HueState {
 	public static final String MODE_LABLE_HS = "hs";
 	public static final String MODE_LABLE_XY = "xy";
 	
-	
+
 	public HueState() {
 	}
 	
@@ -56,8 +58,30 @@ public class HueState {
 		
 		this.reachable = otherState.reachable;
 	}
-	
-	
+
+    public static final Parcelable.Creator<HueState> CREATOR
+            = new Parcelable.Creator<HueState>() {
+        public HueState createFromParcel(Parcel in) {
+            return new HueState(in);
+        }
+
+        public HueState[] newArray(int size) {
+            return new HueState[size];
+        }
+    };
+
+    private HueState(Parcel in) {
+        on = (Boolean)in.readValue(null);
+        bri = (Integer)in.readValue(null);
+        hue = (Integer)in.readValue(null);
+        sat = (Integer)in.readValue(null);
+        xy = (XY)in.readValue(null);
+        ct = (Integer)in.readValue(null);
+        alert = in.readString();
+        effect = in.readString();
+        colorMode = in.readInt();
+        reachable = (Boolean) in.readValue(null);
+    }
 	
 	public Boolean isOn() {
 		return on;
@@ -183,6 +207,26 @@ public class HueState {
 
 		return resultState;
 	}
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+
+        parcel.writeValue(on);
+        parcel.writeValue(bri);
+        parcel.writeValue(hue);
+        parcel.writeValue(sat);
+        parcel.writeValue(xy);
+        parcel.writeValue(ct);
+        parcel.writeValue(alert);
+        parcel.writeValue(effect);
+        parcel.writeInt(colorMode);
+        parcel.writeValue(reachable);
+    }
 }
 
 class XY {

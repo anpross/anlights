@@ -1,7 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_switch"
+        android:showAsAction="ifRoom"
+        android:actionLayout="@layout/action_switch"
+        />
     <item android:id="@+id/menu_settings"
         android:title="@string/menu_settings"
         android:orderInCategory="100"
         android:showAsAction="never" />
     <item android:id="@+id/menu_discover" android:orderInCategory="200" android:title="@string/menu_discover" android:showAsAction="never"></item>
+    android:actionLayout
 </menu>

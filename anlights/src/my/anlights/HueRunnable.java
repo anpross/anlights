@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.util.Log;
+import static junit.framework.Assert.*;
 
 public class HueRunnable implements Runnable {
 
@@ -59,6 +60,9 @@ public class HueRunnable implements Runnable {
 		this.message = message;
 	}
 	public void run() {
+        if(user == null || urlBase == null){
+            readConfig();
+        }
 		Log.d(TAG,"HueRunnable - run()");
 		processMessage(message);
 	}
@@ -73,7 +77,7 @@ public class HueRunnable implements Runnable {
 	}
 	
 	private void processGetLightNames(HueLightNamesMessage message) {
-		
+		assertNotNull("base url is null",urlBase);
 		Log.d(TAG,"processGetLightNames - message:"+message);
 
 

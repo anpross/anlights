@@ -5,11 +5,13 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Handler;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
@@ -21,6 +23,7 @@ import my.anlights.data.HueBridge;
 import my.anlights.data.HueGroup;
 import my.anlights.data.HueLight;
 import my.anlights.data.HueState;
+import my.anlights.gui.LightView;
 import my.anlights.servicetest.LocalWordService;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -29,36 +32,39 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
-public class MainActivity extends Activity implements CallbackListener, OnClickListener, OnSeekBarChangeListener {
+public class MainActivity extends Activity implements CallbackListener, OnClickListener, CompoundButton.OnCheckedChangeListener, LightView.OnLightStateChangeListener {
 
     private static final String TAG = Constants.LOGGING_TAG;
 
     private HueGroup hGroup;
-    ToggleButton onToggle;
+    Switch onToggle;
     Button onHelloPebble;
-    SeekBar briSeek;
-    SeekBar tempSeek;
+    LightView lightView;
+
     private PebbleKit.PebbleDataReceiver pebbleDataHandler = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        doBindService();
-        // username 10-40 chars
-        AlConfig.getInstance(this).setBridgeUser(Constants.BRIDGE_USER);
 
-        setContentView(R.layout.activity_main);
-        initUi();
-
-        initBridge();
-
-        System.out.println("checking service: " + s);
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+
+        super.onStart();
+
+        AlConfig.getInstance(this).setBridgeUser(Constants.BRIDGE_USER);
+        initBridge();
+
+        //doBindService();
+        // username 10-40 chars
+
+        initUi();
+
+
         final Handler handler = new Handler();
         pebbleDataHandler = new PebbleKit.PebbleDataReceiver(Constants.PEBBLE_UUID) {
             @Override
@@ -95,13 +101,6 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
         PebbleKit.registerReceivedDataHandler(this, pebbleDataHandler);
     }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        // TODO Auto-generated method stub
-        super.onRestoreInstanceState(savedInstanceState);
-
-        initBridge();
-    }
 
     private void initBridge() {
         HueDiscoveryTask discovery = new HueDiscoveryTask();
@@ -128,20 +127,51 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
     }
 
     private void initUi() {
-        onToggle = (ToggleButton) findViewById(R.id.onToggleButton);
-        onToggle.setOnClickListener(this);
-        onHelloPebble = (Button) findViewById(R.id.onHelloPebble);
-        onHelloPebble.setOnClickListener(this);
-        briSeek = (SeekBar) findViewById(R.id.briSeekBar);
-        briSeek.setOnSeekBarChangeListener(this);
-        tempSeek = (SeekBar) findViewById(R.id.tempSeekBar);
-        tempSeek.setOnSeekBarChangeListener(this);
+        setContentView(R.layout.activity_main);
+
+        lightView = (LightView) findViewById(R.id.lightView);
+        lightView.setOnLightStateChangeListener(this);
+
+        //onToggle = (Switch) findViewById(R.id.onToggleSwitch);
+        //onToggle.setOnClickListener(this);
+
+//        onHelloPebble = (Button) findViewById(R.id.onHelloPebble);
+//        onHelloPebble.setOnClickListener(this);
+//        float[] hsv = {100f,100f,100f};
+//        onHelloPebble.setBackgroundColor(Color.HSVToColor(hsv));
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        Log.i(TAG,"onCreateOptionsMenu");
         getMenuInflater().inflate(R.menu.activity_main, menu);
+
+        MenuItem item = menu.findItem(R.id.menu_switch); //
+        Log.i(TAG,"found:"+item.getActionView());
+        View actionView = item.getActionView();
+        if ( actionView instanceof LinearLayout) {
+            onToggle = (Switch)actionView.findViewById(R.id.onToggleSwitch);
+            onToggle.setOnCheckedChangeListener(this);
+        }
+
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        Log.i(TAG, "option item selected: "+item);
+        switch (item.getItemId()) {
+            case R.id.menu_switch:
+                Log.i(TAG,"menu switch");
+                return true;
+            case R.id.onToggleSwitch:
+                Log.i(TAG,"on toggle switch");
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public void callback(Object source) {
@@ -172,11 +202,18 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
     }
 
     private void updateControls() {
-        HueState lights = hGroup.getLightState();
-        onToggle.setChecked(lights.isOn());
-        briSeek.setProgress(lights.getBri());
-        if (lights.getCt() != null) {
-            tempSeek.setProgress(lights.getCt() - 154);
+        if(hGroup != null){
+            HueState lights = hGroup.getLightState();
+
+    //        onToggle = (Switch) findViewById(R.id.onToggleSwitch);
+    //        onToggle.setOnCheckedChangeListener(this);
+            if(lights.isOn() != null && onToggle != null){
+                onToggle.setChecked(lights.isOn());
+            }
+
+            if(lights.isOn() != null && onToggle != null){
+                onToggle.setChecked(lights.isOn());
+            }
         }
     }
 
@@ -187,6 +224,30 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
             toggleOnState();
         } else if (v.equals(onHelloPebble)) {
             sendAlertToPebble();
+        }
+
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean onState) {
+        if (compoundButton.equals(onToggle)) {
+            setOnState(onState);
+        }
+    }
+
+    @Override
+    public void onLightStateChanged(LightView lightView, int brightness, int temperature) {
+        Log.i(TAG, "setting lightState to: "+brightness+"/"+temperature);
+        if (hGroup != null) {
+            if (lightView.equals(this.lightView)) {
+                HueState newState = new HueState();
+                newState.setBri(brightness);
+                newState.setCt(temperature + 154);
+                hGroup.setLightState(newState);
+            }
+        } else {
+            onToggle.setChecked(!onToggle.isChecked());
+            Toast.makeText(getApplicationContext(), "no lightgroup", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -202,6 +263,18 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
             hGroup.readLightStatus();
         } else {
             onToggle.setChecked(!onToggle.isChecked());
+            Toast.makeText(getApplicationContext(), "no lightgroup", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void setOnState(boolean newOnState) {
+        if (hGroup != null) {
+            HueState newState = new HueState();
+            newState.setOn(newOnState);
+            onToggle.setChecked(newOnState);
+            hGroup.setLightState(newState);
+            hGroup.readLightStatus();
+        } else {
             Toast.makeText(getApplicationContext(), "no lightgroup", Toast.LENGTH_SHORT).show();
         }
     }
@@ -225,26 +298,6 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 
     public void onStartTrackingTouch(SeekBar seekBar) {
         // TODO Auto-generated method stub
-
-    }
-
-    public void onStopTrackingTouch(SeekBar seekBar) {
-        if (hGroup != null) {
-            if (seekBar.equals(briSeek)) {
-                HueState newState = new HueState();
-                newState.setBri(briSeek.getProgress());
-                hGroup.setLightState(newState);
-
-            } else if (seekBar.equals(tempSeek)) {
-                HueState newState = new HueState();
-                newState.setCt(tempSeek.getProgress() + 154);
-                hGroup.setLightState(newState);
-
-            }
-        } else {
-            onToggle.setChecked(!onToggle.isChecked());
-            Toast.makeText(getApplicationContext(), "no lightgroup", Toast.LENGTH_SHORT).show();
-        }
 
     }
 
@@ -296,4 +349,6 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
         Log.d(TAG, "About to send a modal alert to Pebble: " + notificationData);
         sendBroadcast(i);
     }
+
+
 }

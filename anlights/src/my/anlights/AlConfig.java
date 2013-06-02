@@ -30,6 +30,7 @@ public class AlConfig {
 	}
 	
 	public static AlConfig getExistingInstance(){
+        if (config == null) throw new IllegalStateException("AlConfig instance is null - it needs to be created first");
 		return config;
 	}
 	

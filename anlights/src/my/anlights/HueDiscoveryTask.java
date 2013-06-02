@@ -87,7 +87,7 @@ public class HueDiscoveryTask extends AsyncTask<Void, Void, HueBridge> {
             try {
                 newLocation = doSsdpDiscovery();
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(TAG, "problem during SSDP discovery",e);
             }
             Log.d(TAG,"  found bridge at:"+newLocation);
 			AlConfig.getExistingInstance().setLastBridgeLocation(newLocation);

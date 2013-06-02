@@ -26,10 +26,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="my.anlights.UpdateHueActivity"
-                  android:theme="@android:style/Theme.NoDisplay">
 
-        </activity>
         <service
             android:name="my.anlights.servicetest.LocalWordService"
             android:icon="@drawable/ic_launcher"

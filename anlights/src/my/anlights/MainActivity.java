@@ -5,17 +5,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.*;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 import com.getpebble.android.kit.util.PebbleTuple;
@@ -32,7 +30,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class MainActivity extends Activity implements CallbackListener, OnClickListener, CompoundButton.OnCheckedChangeListener, LightView.OnLightStateChangeListener {
 
@@ -58,9 +55,6 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 
         AlConfig.getInstance(this).setBridgeUser(Constants.BRIDGE_USER);
         initBridge();
-
-        //doBindService();
-        // username 10-40 chars
 
         initUi();
 
@@ -132,14 +126,6 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
         lightView = (LightView) findViewById(R.id.lightView);
         lightView.setOnLightStateChangeListener(this);
 
-        //onToggle = (Switch) findViewById(R.id.onToggleSwitch);
-        //onToggle.setOnClickListener(this);
-
-//        onHelloPebble = (Button) findViewById(R.id.onHelloPebble);
-//        onHelloPebble.setOnClickListener(this);
-//        float[] hsv = {100f,100f,100f};
-//        onHelloPebble.setBackgroundColor(Color.HSVToColor(hsv));
-
     }
 
     @Override
@@ -148,7 +134,6 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
         getMenuInflater().inflate(R.menu.activity_main, menu);
 
         MenuItem item = menu.findItem(R.id.menu_switch); //
-        Log.i(TAG,"found:"+item.getActionView());
         View actionView = item.getActionView();
         if ( actionView instanceof LinearLayout) {
             onToggle = (Switch)actionView.findViewById(R.id.onToggleSwitch);
@@ -205,8 +190,6 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
         if(hGroup != null){
             HueState lights = hGroup.getLightState();
 
-    //        onToggle = (Switch) findViewById(R.id.onToggleSwitch);
-    //        onToggle.setOnCheckedChangeListener(this);
             if(lights.isOn() != null && onToggle != null){
                 onToggle.setChecked(lights.isOn());
             }
@@ -285,51 +268,6 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
         } else {
             onToggle.setChecked(!onToggle.isChecked());
             Toast.makeText(getApplicationContext(), "no lightgroup", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-
-    public void onProgressChanged(SeekBar seekBar, int progress,
-                                  boolean fromUser) {
-        // TODO Auto-generated method stub
-
-
-    }
-
-    public void onStartTrackingTouch(SeekBar seekBar) {
-        // TODO Auto-generated method stub
-
-    }
-
-    // http://www.vogella.com/articles/AndroidServices/article.html
-    private LocalWordService s;
-
-    private ServiceConnection mConnection = new ServiceConnection() {
-
-        public void onServiceConnected(ComponentName className, IBinder binder) {
-            s = ((LocalWordService.MyBinder) binder).getService();
-            Toast.makeText(MainActivity.this, "Connected",
-                    Toast.LENGTH_SHORT).show();
-
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            s = null;
-        }
-    };
-    private ArrayAdapter<String> adapter;
-
-    void doBindService() {
-        bindService(new Intent(this, LocalWordService.class), mConnection,
-                Context.BIND_AUTO_CREATE);
-    }
-
-    public void showServiceData(View view) {
-        if (s != null) {
-
-            Toast.makeText(this, "Number of elements",
-                    Toast.LENGTH_SHORT).show();
-            adapter.notifyDataSetChanged();
         }
     }
 

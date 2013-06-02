@@ -15,7 +15,7 @@ public class LightView extends View {
 
     private static final String TAG = Constants.LOGGING_TAG;
 
-    private Paint textPaint;
+    private Paint paint;
 
     private int height;
     private int width;
@@ -42,10 +42,10 @@ public class LightView extends View {
 
     private OnLightStateChangeListener changeListener;
 
-    //2000k - 7000k in 200k steps
+    //2000k - 6600k in 200k steps
     private int[] COLOR_REFERENCES = {0xff8912,0xff932c,0xff9d3f,0xffa54f,0xffad5e,0xffb46b,0xffbb78,0xffc184,0xffc78f,
             0xffcc99,0xffd1a3,0xffd5ad,0xffd9b6,0xffddbe,0xffe1c6,0xffe4ce,0xffe8d5,0xffebdc,0xffeee3,0xfff0e9,0xfff3ef,
-            0xfff5f5,0xfff8fb,0xfef9ff,0xfef9ff,0xf9f6ff,0xf5f3ff,0xf0f1ff,0xedefff,0xe9edff,0xe6ebff,0xe3e9ff,0xe0e7ff  };
+            0xfff5f5,0xfff8fb,0xfef9ff,0xfef9ff,0xf9f6ff,0xf5f3ff,0xf0f1ff,0xedefff,0xe9edff,0xe6ebff};
     public LightView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -78,10 +78,10 @@ public class LightView extends View {
     }
 
     private void initLightView() {
-        textPaint = new Paint();
+        paint = new Paint();
         buttonWidth = (int) getResources().getDisplayMetrics().density * GRID_WIDTH_DP;
         borderWidth = (int) getResources().getDisplayMetrics().density * OUTER_GRID_BORDER;
-        textPaint.setAntiAlias(true);
+        paint.setAntiAlias(true);
     }
 
     @Override
@@ -90,8 +90,6 @@ public class LightView extends View {
         int hCount = 0;
         int vCount = 0;
 
-//        textPaint.setColor(Color.DKGRAY);
-//        canvas.drawRect(new Rect(0,0,usableWidth,usableHeight),textPaint);
         Rect rect;
         for (; vCount < verticalButtons; vCount++){
             for(; hCount < horizontalButtons; hCount++){
@@ -102,8 +100,8 @@ public class LightView extends View {
                     int right = borderWidth + ((hCount + 1) * buttonWidth)+highlightBorder;
                     int bottom = borderWidth + ((vCount + 1) * buttonWidth)+highlightBorder;
                     rect = new Rect(left, top, right, bottom);
-                    textPaint.setColor(Color.WHITE);
-                    canvas.drawRect(rect, textPaint);
+                    paint.setColor(Color.WHITE);
+                    canvas.drawRect(rect, paint);
                 }
                 int left = borderWidth + (hCount * buttonWidth)+borderWidth;
                 int top = borderWidth + (vCount * buttonWidth)+borderWidth;
@@ -112,23 +110,34 @@ public class LightView extends View {
                 //Log.i(TAG, "drawing: "+left+" "+top+" "+right+" "+bottom);
 
                 rect = new Rect(left, top, right, bottom);
-                textPaint.setColor(Color.BLACK);
-                canvas.drawRect(rect, textPaint);
-                textPaint.setColor(getColorForCoordinates(hCount,vCount));
-                canvas.drawRect(rect, textPaint);
+                paint.setColor(Color.BLACK);
+                canvas.drawRect(rect, paint);
+                paint.setColor(getColorForCoordinates(hCount, vCount));
+                canvas.drawRect(rect, paint);
             }
             hCount = 0;
         }
-        //canvas.drawText("hello world, i'm "+width+" by "+height+ " density is:"+getResources().getDisplayMetrics().density, 0, 100, textPaint);
     }
 
+    /**
+     * horrizontal : link-kalt -> rechts-warm
+     * vertical : oben-hell -> unten aus
+
+     * @param horizontal
+     * @param vertical
+     * @return
+     */
     private int getColorForCoordinates(int horizontal, int vertical) {
-        // horrizontal : link-kalt -> rechts-warm
-        // vertical : oben-hell -> unten aus
+        double minBrightness = 0.25;
+
         int alpha = BRIGHTNESS_MAX - (vertical * BRIGHTNESS_MAX / (verticalButtons - 1 )); // -1 because this number has base 0
         //Log.i(TAG, "return alpha:"+alpha+" for v-pos:"+vertical);
         int temp = TEMPERATURE_MAX - (horizontal * TEMPERATURE_MAX / (horizontalButtons - 1));
         int color = getColorForPct(temp);
+
+
+        alpha = (int) (alpha - (alpha * minBrightness) + (255 * minBrightness));
+
 
         return Color.argb(alpha,Color.red(color), Color.green(color), Color.blue(color));
     }
@@ -136,15 +145,19 @@ public class LightView extends View {
     private int getColorForPct(double pct){
 //        Log.i(TAG, "getColorForPct:"+pct);
 
-        double positionInRange = pct / COLOR_REFERENCES.length;
+        double positionInRange = pct / TEMPERATURE_MAX * COLOR_REFERENCES.length;
         int lowValue = (int) Math.floor(positionInRange);
         int highValue = (int) Math.ceil(positionInRange);
 
         double positionBetween = pct - lowValue * COLOR_REFERENCES.length;
 
-        //Log.i(TAG, "pct:"+pct+" l:"+lowValue+" h:"+highValue+" pos:"+positionBetween);
 
-        return COLOR_REFERENCES[lowValue];
+        lowValue = lowValue -1;
+        if(lowValue < 0){
+            lowValue = 0;
+        }
+
+        return COLOR_REFERENCES[lowValue]; // base 0
     }
 
     @Override

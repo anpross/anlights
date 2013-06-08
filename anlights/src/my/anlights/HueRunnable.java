@@ -1,15 +1,8 @@
 package my.anlights;
 
-import java.io.IOException;
-
-import my.anlights.data.HueLight;
-import my.anlights.data.HueLightNamesMessage;
-import my.anlights.data.HueMessage;
-import my.anlights.data.HueReadStateMessage;
-import my.anlights.data.HueState;
-import my.anlights.data.HueWriteStateMessage;
+import my.anlights.data.*;
+import my.anlights.util.MyLog;
 import my.anlights.util.ParserHelper;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
@@ -20,150 +13,156 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.util.Log;
-import static junit.framework.Assert.*;
+import java.io.IOException;
+
+import static junit.framework.Assert.assertNotNull;
 
 public class HueRunnable implements Runnable {
 
-    private static final String TAG = Constants.LOGGING_TAG;
-
-
-	
+	private static final String TAG = Constants.LOGGING_TAG;
 
 	private DefaultHttpClient httpClient;
 	private String user;
 	private String urlBase;
-	
-	private AlConfig config;
-	
+
 	private JSONObject result;
-	
+
 	private HueMessage message;
-	
-	
+
+	private final static String CLASS_NAME = HueRunnable.class.getCanonicalName();
+
 	private void readConfig() {
-		config = AlConfig.getExistingInstance();
+		MyLog.entering(CLASS_NAME, "readConfig");
+		AlConfig config = AlConfig.getExistingInstance();
 
 		user = config.getBridgeUser();
 		urlBase = config.getBridgeUrlBase();
-		
+		MyLog.exiting(CLASS_NAME, "readConfig");
+	}
+
+	public HueRunnable() {
+
+		readConfig();
 
 	}
-	
-	public HueRunnable() {
-		
-		readConfig();
-		
-	}
-	
-	public void setMessage(HueMessage message){
+
+	public void setMessage(HueMessage message) {
 		this.message = message;
 	}
+
 	public void run() {
-        if(user == null || urlBase == null){
-            readConfig();
-        }
-		Log.d(TAG,"HueRunnable - run()");
-		processMessage(message);
-	}
-	private void processMessage(HueMessage message){
-		if(message instanceof HueLightNamesMessage){
-			processGetLightNames((HueLightNamesMessage)message);
-		} else if (message instanceof HueReadStateMessage){
-			processReadLightState((HueReadStateMessage)message);
-		} else if (message instanceof HueWriteStateMessage) {
-			processWriteLightState((HueWriteStateMessage)message);
+		MyLog.entering(CLASS_NAME, "run");
+		if (user == null || urlBase == null) {
+			readConfig();
 		}
+		processMessage(message);
+		MyLog.exiting(CLASS_NAME, "run");
 	}
-	
+
+	private void processMessage(HueMessage message) {
+		MyLog.entering(CLASS_NAME, "processMessage", message);
+		if (message instanceof HueLightNamesMessage) {
+			processGetLightNames((HueLightNamesMessage) message);
+		} else if (message instanceof HueReadStateMessage) {
+			processReadLightState((HueReadStateMessage) message);
+		} else if (message instanceof HueWriteStateMessage) {
+			processWriteLightState((HueWriteStateMessage) message);
+		}
+		MyLog.exiting(CLASS_NAME, "processMessage");
+	}
+
 	private void processGetLightNames(HueLightNamesMessage message) {
-		assertNotNull("base url is null",urlBase);
-		Log.d(TAG,"processGetLightNames - message:"+message);
+		MyLog.entering(CLASS_NAME, "processGetLightNames", message);
 
-
-		String url = urlBase+"api/"+user+"/lights";
-
+		assertNotNull("base url is null", urlBase);
+		String url = urlBase + "api/" + user + "/lights";
 		executeGet(url);
+
+		MyLog.exiting(CLASS_NAME, "processGetLightNames");
 	}
-	
-	private void processWriteLightState(HueWriteStateMessage message){
+
+	private void processWriteLightState(HueWriteStateMessage message) {
 		HueLight light = message.getLight();
 		HueState state = message.getState();
-		
-		String url = urlBase+"api/"+user+"/lights/"+light.getId()+"/state";
+
+		String url = urlBase + "api/" + user + "/lights/" + light.getId() + "/state";
 
 		executePut(url, state.toJsonObject());
 	}
 
 	private void executeGet(String url) {
-		Log.d(TAG,"executeGet - url:"+url);
-		
+		MyLog.entering(CLASS_NAME, "executeGet", url);
+
 		readConfig();
-		
-		if(httpClient == null) {
-			httpClient = new DefaultHttpClient();			
+
+		if (httpClient == null) {
+			httpClient = new DefaultHttpClient();
 		}
 		HttpGet get = new HttpGet(url);
 		try {
-            // java.lang.IllegalStateException: Target host must not be null, or set in parameters. scheme=null, host=null, path=nullapi/anlight123/lights
-            // only on first run when there is no host in config and discovery task did not yet get a response
+			// java.lang.IllegalStateException: Target host must not be null, or set in parameters. scheme=null, host=null, path=nullapi/anlight123/lights
+			// only on first run when there is no host in config and discovery task did not yet get a response
 			HttpResponse response = httpClient.execute(get);
 			int retCode = response.getStatusLine().getStatusCode();
-			if(retCode == HttpStatus.SC_OK){
+			if (retCode == HttpStatus.SC_OK) {
 				String sResult = ParserHelper.readInputStream(response.getEntity().getContent());
 				sResult = ParserHelper.removeBrackets(sResult.trim());
-				Log.d(TAG, "need to make sense from:\n"+sResult);
+				MyLog.d("recived response:\n" + sResult);
 				result = new JSONObject(sResult);
 			}
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+			MyLog.e("ClientProtocolException during GET", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			MyLog.e("IOException during GET", e);
 		} catch (JSONException e) {
-			e.printStackTrace();
+			MyLog.e("problem parsing JSON from GET request", e);
 		}
+		MyLog.exiting(CLASS_NAME, "executeGet");
 	}
-	
-	
-	private void executePut(String url, JSONObject input){
-		if(httpClient == null) {
-			httpClient = new DefaultHttpClient();			
+
+
+	private void executePut(String url, JSONObject input) {
+		MyLog.entering(CLASS_NAME, "executePut", url, input);
+		if (httpClient == null) {
+			httpClient = new DefaultHttpClient();
 		}
-		
+
 		HttpPut put = new HttpPut(url);
 		try {
 			put.setEntity(new StringEntity(input.toString()));
-			
-			Log.d(TAG,"PutThreadUrl:"+put.getURI());
-			Log.d(TAG,"content:\n"+input.toString());
+
+			MyLog.d("PutThreadUrl:" + put.getURI());
+			MyLog.d("  content:" + input.toString());
 			HttpResponse response = httpClient.execute(put);
 
 			int retCode = response.getStatusLine().getStatusCode();
-			if(retCode == HttpStatus.SC_OK){
+			if (retCode == HttpStatus.SC_OK) {
 				String sResult = ParserHelper.readInputStream(response.getEntity().getContent());
 				sResult = ParserHelper.removeBrackets(sResult.trim());
-				Log.d(TAG,"need to make sense from:\n"+sResult);
+				MyLog.d("recieved resonse:" + sResult);
 				result = new JSONObject(sResult);
 			}
 		} catch (ClientProtocolException e) {
-			e.printStackTrace();
+			MyLog.e("ClientProtocolException during GET", e);
 		} catch (IOException e) {
-			e.printStackTrace();
+			MyLog.e("IOException during GET", e);
 		} catch (JSONException e) {
-			e.printStackTrace();
+			MyLog.e("problem parsing JSON from GET request", e);
 		}
+		MyLog.exiting(CLASS_NAME, "executePut");
+	}
 
-	}
-	
 	private void processReadLightState(HueReadStateMessage message) {
+		MyLog.entering(CLASS_NAME, "processReadLightState", message);
+
 		HueLight light = message.getLight();
-		String url = urlBase+"api/"+user+"/lights/"+light.getId();
-		
+		String url = urlBase + "api/" + user + "/lights/" + light.getId();
 		executeGet(url);
+
+		MyLog.exiting(CLASS_NAME, "processReadLightState");
 	}
-	
-	public JSONObject getResult(){
+
+	public JSONObject getResult() {
 		return result;
 	}
-
 }

@@ -1,15 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="my.anlights"
-    android:versionCode="1"
-    android:versionName="1.0">
+          package="my.anlights"
+          android:versionCode="1"
+          android:versionName="1.0">
 
     <uses-sdk
         android:minSdkVersion="16"
-        android:targetSdkVersion="17" />
+        android:targetSdkVersion="17"/>
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -21,10 +21,15 @@
             android:label="@string/title_activity_main"
             android:configChanges="orientation|keyboardHidden">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_main"
+            android:configChanges="orientation|keyboardHidden">
         </activity>
 
         <service
@@ -33,13 +38,13 @@
             android:label="@string/remote_service_label"></service>
 
         <receiver android:name="my.anlights.servicetest.MyStartServiceReceiver">
-            <action android:name="android.net.wifi.STATE_CHANGE" />
-            <action android:name="android.net.wifi.NETWORK_IDS_CHANGED" />
-            <action android:name="android.net.wifi.supplicant.CONNECTION_CHANGE" />
+            <action android:name="android.net.wifi.STATE_CHANGE"/>
+            <action android:name="android.net.wifi.NETWORK_IDS_CHANGED"/>
+            <action android:name="android.net.wifi.supplicant.CONNECTION_CHANGE"/>
         </receiver>
         <receiver android:name="my.anlights.servicetest.PebbleConnectionReceiver">
             <intent-filter>
-                <action android:name="com.getpebble.action.app.RECEIVE" />
+                <action android:name="com.getpebble.action.app.RECEIVE"/>
                 <action android:name="com.getpebble.action.PEBBLE_CONNECTED"></action>
                 <action android:name="com.getpebble.action.PEBBLE_DISCONNECTED"></action>
             </intent-filter>

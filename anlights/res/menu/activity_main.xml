@@ -7,7 +7,7 @@
     <item android:id="@+id/menu_settings"
         android:title="@string/menu_settings"
         android:orderInCategory="100"
-        android:showAsAction="never" />
+        android:showAsAction="never"/>
     <item android:id="@+id/menu_discover" android:orderInCategory="200" android:title="@string/menu_discover" android:showAsAction="never"></item>
     android:actionLayout
 </menu>

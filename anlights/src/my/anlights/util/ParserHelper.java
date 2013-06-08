@@ -8,30 +8,28 @@ import java.io.InputStreamReader;
 public class ParserHelper {
 
 	/**
-	 * 
 	 * @param input
 	 * @return
 	 */
-	public static String removeBrackets(String input){
-		if(input.indexOf("[")==0 && input.lastIndexOf("]")==(input.length()-1)){
-			return input.substring(1, input.length()-1);
+	public static String removeBrackets(String input) {
+		if (input.indexOf("[") == 0 && input.lastIndexOf("]") == (input.length() - 1)) {
+			return input.substring(1, input.length() - 1);
 		} else return input;
 	}
-	
+
 	public static String readInputStream(InputStream is) {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(is));
 		StringBuilder sb = new StringBuilder();
 
 		String line = null;
 		try {
-			while ((line = reader.readLine()) != null)
-			{
-			    sb.append(line + "\n");
+			while ((line = reader.readLine()) != null) {
+				sb.append(line).append("\n");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return sb.toString();
 	}
-	
+
 }

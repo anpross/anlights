@@ -1,4 +1,7 @@
-package my.anlights.data;
+package my.anlights.data.messages;
+
+import my.anlights.data.HueLight;
+import my.anlights.data.HueState;
 
 public class HueWriteStateMessage implements HueMessage {
 

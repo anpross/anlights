@@ -144,11 +144,10 @@ public class LightView extends View {
 	 * @return
 	 */
 	private int getColorForCoordinates(int horizontal, int vertical) {
-		MyLog.entering(CLASS_NAME, "getColorForCoordinates", horizontal, vertical);
+		//MyLog.entering(CLASS_NAME, "getColorForCoordinates", horizontal, vertical);
 		double minBrightness = 0.25;
 
 		int alpha = BRIGHTNESS_MAX - (vertical * BRIGHTNESS_MAX / (verticalButtons - 1)); // -1 because this number has base 0
-		//Log.i(TAG, "return alpha:"+alpha+" for v-pos:"+vertical);
 		int temp = TEMPERATURE_MAX - (horizontal * TEMPERATURE_MAX / (horizontalButtons - 1));
 		int color = getColorForPct(temp);
 
@@ -157,13 +156,12 @@ public class LightView extends View {
 
 		int theColor = Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color));
 
-		MyLog.exiting(CLASS_NAME, "getColorForCoordinates", theColor);
+		//MyLog.exiting(CLASS_NAME, "getColorForCoordinates", theColor);
 		return theColor;
 	}
 
 	private int getColorForPct(double pct) {
-		MyLog.entering(CLASS_NAME, "getColorForPct", pct);
-//        Log.i(TAG, "getColorForPct:"+pct);
+		//MyLog.entering(CLASS_NAME, "getColorForPct", pct);
 
 		double positionInRange = pct / TEMPERATURE_MAX * COLOR_REFERENCES.length;
 		int lowValue = (int) Math.floor(positionInRange);
@@ -178,7 +176,7 @@ public class LightView extends View {
 		}
 
 		int theColor = COLOR_REFERENCES[lowValue]; // base 0
-		MyLog.exiting(CLASS_NAME, "getColorForCoordinates", theColor);
+		//MyLog.exiting(CLASS_NAME, "getColorForCoordinates", theColor);
 		return theColor;
 	}
 

@@ -17,6 +17,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+@Deprecated
 public class HueController {
 
 	private AlConfig config;
@@ -32,7 +33,7 @@ public class HueController {
 	public HueController(HueBridge bridge) {
 		config = AlConfig.getExistingInstance();
 
-		bridge.setController(this);
+		//bridge.setController(this);
 
 		HueHttpGetThread getThread = new HueHttpGetThread();
 		postThread = new HueHttpPostThread();
@@ -44,34 +45,6 @@ public class HueController {
 		user = config.getBridgeUser();
 		urlBase = config.getBridgeUrlBase();
 	}
-
-//	public List<HueLight> getLightNames() {
-//
-//		readConfig();
-//
-//		String url = urlBase+"api/"+user+"/lights";
-//
-//		JSONObject result = executeGet(url);
-//
-//		return parseLights(result);
-//	}
-
-//	public JSONObject readLightState(HueLight light){
-//		String url = urlBase+"api/"+user+"/lights/"+light.getId();
-//		JSONObject lightJson = executeGet(url);
-//		return lightJson;
-//	}
-//
-//	public boolean writeLightState(HueLight light, HueState state){
-//		JSONObject input =state.toJsonObject();
-//		String url;
-//		url = urlBase+"api/"+user+"/lights/"+light.getId()+"/state";
-//
-//		//TODO evaluate response
-//		executePut(url, input);
-//
-//		return true;
-//	}
 
 	public void registerUser() {
 		MyLog.entering(CLASS_NAME, "registerUser");
@@ -94,21 +67,6 @@ public class HueController {
 		MyLog.exiting(CLASS_NAME, "registerUser", result);
 	}
 
-//	private JSONObject executeGet(String url){
-//		Log.d(TAG,"execute get on:"+url);
-//		JSONObject result = null;
-//		try {
-//			getThread.setUrl(url);
-//		    Thread t = new Thread(getThread);
-//			t.start();
-//			t.join();
-//			result = getThread.getResult();
-//		} catch (InterruptedException e) {
-//			Log.e(TAG, "problem executing thread", e);
-//		}
-//		return result;
-//	}
-
 	private JSONObject executePost(String url, JSONObject input) {
 		MyLog.entering(CLASS_NAME, "executePost", url, input);
 		JSONObject result = null;
@@ -124,45 +82,8 @@ public class HueController {
 		}
 		return result;
 	}
-
-//	private JSONObject executePut(String url, JSONObject input){
-//		Log.d(TAG,"execute put on:"+url);
-//		Log.d(TAG,"json:"+input);
-//		JSONObject result = null;
-//		try {
-//			putThread.setUrl(url);
-//			putThread.setInput(input);
-//		    Thread t = new Thread(putThread);
-//			t.start();
-//			t.join();
-//			result = putThread.getResult();
-//		} catch (InterruptedException e) {
-//			Log.e(TAG, "problem executing thread", e);
-//		}
-//		return result;
-//	}
-
-//	private List<HueLight> parseLights(JSONObject result) {
-//		List<HueLight> lights = new LinkedList<HueLight>();
-//		@SuppressWarnings("unchecked")
-//		Iterator<String> iKeys = result.keys();
-//		while(iKeys.hasNext()){
-//			String currKey = iKeys.next();
-//			JSONObject currLamp;
-//			try {
-//				currLamp = result.getJSONObject(currKey);
-//				HueLight currLight = new HueLight(currKey, currLamp.getString("name"), bridge);
-//				lights.add(currLight);
-//			} catch (JSONException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		return lights;
-//	}
-
-
 }
-
+@Deprecated
 class HueHttpGetThread implements Runnable {
 
 	private HttpClient httpClient;
@@ -206,7 +127,7 @@ class HueHttpGetThread implements Runnable {
 		return result;
 	}
 }
-
+@Deprecated
 class HueHttpPostThread implements Runnable {
 
 	private HttpClient httpClient;
@@ -257,10 +178,8 @@ class HueHttpPostThread implements Runnable {
 		return result;
 	}
 }
-
+@Deprecated
 class HueHttpPutThread implements Runnable {
-
-	private static String TAG = Constants.LOGGING_TAG;
 
 	private HttpClient httpClient;
 	private JSONObject result;

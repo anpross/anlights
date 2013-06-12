@@ -1,4 +1,4 @@
-package my.anlights.data;
+package my.anlights.data.messages;
 
 public interface HueMessage {
 

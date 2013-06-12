@@ -1,6 +1,6 @@
 package my.anlights;
 
-import my.anlights.data.HueMessage;
+import my.anlights.data.messages.HueMessage;
 import my.anlights.util.MyLog;
 import org.json.JSONObject;
 

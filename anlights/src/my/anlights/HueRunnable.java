@@ -1,12 +1,14 @@
 package my.anlights;
 
 import my.anlights.data.*;
+import my.anlights.data.messages.*;
 import my.anlights.util.MyLog;
 import my.anlights.util.ParserHelper;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -67,8 +69,33 @@ public class HueRunnable implements Runnable {
 			processReadLightState((HueReadStateMessage) message);
 		} else if (message instanceof HueWriteStateMessage) {
 			processWriteLightState((HueWriteStateMessage) message);
+		} else if (message instanceof HueReadConfigMessage) {
+			processReadConfig((HueReadConfigMessage) message);
+		} else if (message instanceof HueRegistrationMessage) {
+			processRegistration((HueRegistrationMessage) message);
 		}
 		MyLog.exiting(CLASS_NAME, "processMessage");
+	}
+
+	private void processRegistration(HueRegistrationMessage message) {
+		MyLog.entering(CLASS_NAME, "processRegistration", message);
+
+		JSONObject register = new JSONObject();
+
+		String url = urlBase + "api";
+		try {
+			register.put("devicetype", message.getDeviceType());
+			register.put("username", message.getUserName());
+		} catch (JSONException e) {
+			MyLog.e("error creating json for registration request", e);
+		}
+		MyLog.d("register json:" + register);
+
+		executePost(url, register);
+
+
+
+		MyLog.exiting(CLASS_NAME, "processRegistration");
 	}
 
 	private void processGetLightNames(HueLightNamesMessage message) {
@@ -90,6 +117,7 @@ public class HueRunnable implements Runnable {
 		executePut(url, state.toJsonObject());
 	}
 
+	// TODO refactor me
 	private void executeGet(String url) {
 		MyLog.entering(CLASS_NAME, "executeGet", url);
 
@@ -107,7 +135,7 @@ public class HueRunnable implements Runnable {
 			if (retCode == HttpStatus.SC_OK) {
 				String sResult = ParserHelper.readInputStream(response.getEntity().getContent());
 				sResult = ParserHelper.removeBrackets(sResult.trim());
-				MyLog.d("recived response:\n" + sResult);
+				MyLog.d("received response:\n" + sResult);
 				result = new JSONObject(sResult);
 			}
 		} catch (ClientProtocolException e) {
@@ -120,7 +148,7 @@ public class HueRunnable implements Runnable {
 		MyLog.exiting(CLASS_NAME, "executeGet");
 	}
 
-
+	// TODO refactor me
 	private void executePut(String url, JSONObject input) {
 		MyLog.entering(CLASS_NAME, "executePut", url, input);
 		if (httpClient == null) {
@@ -139,17 +167,49 @@ public class HueRunnable implements Runnable {
 			if (retCode == HttpStatus.SC_OK) {
 				String sResult = ParserHelper.readInputStream(response.getEntity().getContent());
 				sResult = ParserHelper.removeBrackets(sResult.trim());
-				MyLog.d("recieved resonse:" + sResult);
+				MyLog.d("received response:" + sResult);
 				result = new JSONObject(sResult);
 			}
 		} catch (ClientProtocolException e) {
-			MyLog.e("ClientProtocolException during GET", e);
+			MyLog.e("ClientProtocolException during PUT", e);
 		} catch (IOException e) {
-			MyLog.e("IOException during GET", e);
+			MyLog.e("IOException during PUT", e);
 		} catch (JSONException e) {
-			MyLog.e("problem parsing JSON from GET request", e);
+			MyLog.e("problem parsing JSON from PUT request", e);
 		}
 		MyLog.exiting(CLASS_NAME, "executePut");
+	}
+
+	// TODO refactor me
+	private void executePost(String url, JSONObject input) {
+		MyLog.entering(CLASS_NAME, "executePost", url, input);
+		if (httpClient == null) {
+			httpClient = new DefaultHttpClient();
+		}
+
+		HttpPost post = new HttpPost(url);
+		try {
+			post.setEntity(new StringEntity(input.toString()));
+
+			MyLog.d("PostThreadUrl:" + post.getURI());
+			MyLog.d("  content:" + input.toString());
+			HttpResponse response = httpClient.execute(post);
+
+			int retCode = response.getStatusLine().getStatusCode();
+			if (retCode == HttpStatus.SC_OK) {
+				String sResult = ParserHelper.readInputStream(response.getEntity().getContent());
+				sResult = ParserHelper.removeBrackets(sResult.trim());
+				MyLog.d("received response:" + sResult);
+				result = new JSONObject(sResult);
+			}
+		} catch (ClientProtocolException e) {
+			MyLog.e("ClientProtocolException during POST", e);
+		} catch (IOException e) {
+			MyLog.e("IOException during POST", e);
+		} catch (JSONException e) {
+			MyLog.e("problem parsing JSON from POST request", e);
+		}
+		MyLog.exiting(CLASS_NAME, "executePost");
 	}
 
 	private void processReadLightState(HueReadStateMessage message) {
@@ -160,6 +220,14 @@ public class HueRunnable implements Runnable {
 		executeGet(url);
 
 		MyLog.exiting(CLASS_NAME, "processReadLightState");
+	}
+
+	private void processReadConfig(HueReadConfigMessage message) {
+		MyLog.entering(CLASS_NAME, "processReadConfig", message);
+		String url = urlBase + "api/" + user + "/config/";
+		executeGet(url);
+
+		MyLog.exiting(CLASS_NAME, "processReadConfig");
 	}
 
 	public JSONObject getResult() {

@@ -13,12 +13,10 @@ import android.widget.*;
 import com.getpebble.android.kit.PebbleKit;
 import com.getpebble.android.kit.util.PebbleDictionary;
 import com.getpebble.android.kit.util.PebbleTuple;
-import my.anlights.data.HueBridge;
-import my.anlights.data.HueGroup;
-import my.anlights.data.HueLight;
-import my.anlights.data.HueState;
+import my.anlights.data.*;
 import my.anlights.gui.LightView;
 import my.anlights.util.MyLog;
+import my.anlights.util.UserNameGenerator;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -33,6 +31,8 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 	Switch onToggle;
 	Button onHelloPebble;
 	LightView lightView;
+
+	HueBridge bridge;
 
 	private PebbleKit.PebbleDataReceiver pebbleDataHandler = null;
 
@@ -180,23 +180,39 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 			MyLog.d("discover done - base url:" + AlConfig.getExistingInstance().getBridgeUrlBase());
 
 //			new HueLights().registerUser();
-			HueBridge bridge = discovery.getBridge();
+			bridge = discovery.getBridge();
+			try{
+				if (bridge.isConnected()) {
+					List<HueLight> lights = bridge.getLightNames();
 
-			if (bridge.isConnected()) {
-				List<HueLight> lights = bridge.getLightNames();
+					hGroup = new HueGroup();
+					for (HueLight currLight : lights) {
+						hGroup.addLight(currLight);
+					}
+					hGroup.readLightStatus();
 
-				hGroup = new HueGroup();
-				for (HueLight currLight : lights) {
-					hGroup.addLight(currLight);
+					updateControls();
+
+					MyLog.d("group state:" + hGroup.getLightState());
 				}
-				hGroup.readLightStatus();
-
-				updateControls();
-
-				MyLog.d("group state:" + hGroup.getLightState());
+			} catch (HueException e) {
+				if(e.isAuthProblem()){
+					MyLog.i("not authorized! - starting registration");
+					doUserRegistration();
+				} else {
+					MyLog.e("HueException",e);
+				}
 			}
 		}
 		MyLog.exiting(CLASS_NAME, "callback");
+	}
+
+	private void doUserRegistration() {
+		try {
+			bridge.registerUser();
+		} catch (HueException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void updateControls() {
@@ -219,7 +235,11 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 		MyLog.entering(CLASS_NAME, "onClick", v);
 		MyLog.d("got clickEvent:" + v);
 		if (v.equals(onToggle)) {
-			toggleOnState();
+			try {
+				toggleOnState();
+			} catch (HueException e) {
+				MyLog.e("problem toggeling on-state",e);
+			}
 		} else if (v.equals(onHelloPebble)) {
 			sendAlertToPebble();
 		}
@@ -230,7 +250,11 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 	public void onCheckedChanged(CompoundButton compoundButton, boolean onState) {
 		MyLog.entering(CLASS_NAME, "onCheckedChanged", compoundButton, onState);
 		if (compoundButton.equals(onToggle)) {
-			setOnState(onState);
+			try {
+				setOnState(onState);
+			} catch (HueException e) {
+				MyLog.e("problem setting on-state",e);
+			}
 		}
 		MyLog.exiting(CLASS_NAME, "onCheckedChanged");
 	}
@@ -253,7 +277,7 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 		MyLog.exiting(CLASS_NAME, "onLightStateChanged");
 	}
 
-	public void toggleOnState() {
+	public void toggleOnState() throws HueException {
 		if (hGroup != null) {
 			HueState lights = hGroup.getLightState();
 			boolean newOnState = !lights.isOn();
@@ -268,7 +292,7 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 		}
 	}
 
-	public void setOnState(boolean newOnState) {
+	public void setOnState(boolean newOnState) throws HueException{
 		MyLog.entering(CLASS_NAME, "setOnState", newOnState);
 		if (hGroup != null) {
 			HueState newState = new HueState();

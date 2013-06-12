@@ -59,7 +59,7 @@ public class HueGroup {
 	/**
 	 * reading the current light status
 	 */
-	public void readLightStatus() {
+	public void readLightStatus() throws HueException {
 		MyLog.entering(CLASS_NAME, "readLightStatus");
 		for (HueLight currLight : lights) {
 			currLight.readLightStatus();

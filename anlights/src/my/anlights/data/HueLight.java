@@ -5,7 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class HueLight {
+public class HueLight extends HueObject {
 
 	// using all objects to have a null state
 	private String id;
@@ -115,7 +115,12 @@ public class HueLight {
 	 *
 	 * @param jLight
 	 */
-	private void updateLightStatus(JSONObject jLight) {
+	private void updateLightStatus(JSONObject jLight) throws HueException {
+		HueError error = checkForError(jLight);
+		if (error != null) {
+			throw new HueException(error);
+		}
+
 		try {
 			JSONObject jState = jLight.getJSONObject("state");
 
@@ -143,7 +148,7 @@ public class HueLight {
 		}
 	}
 
-	public void readLightStatus() {
+	public void readLightStatus() throws HueException {
 
 		JSONObject lightJson = bridge.readLightState(this);
 		updateLightStatus(lightJson);

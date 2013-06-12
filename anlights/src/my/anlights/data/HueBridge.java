@@ -1,9 +1,7 @@
 package my.anlights.data;
 
-import my.anlights.AlConfig;
-import my.anlights.CallbackListener;
-import my.anlights.HueController;
-import my.anlights.HueThread;
+import my.anlights.*;
+import my.anlights.data.messages.*;
 import my.anlights.util.MyLog;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,7 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public class HueBridge implements CallbackListener {
+public class HueBridge extends HueObject implements CallbackListener {
 
 	private boolean isSupported = false;
 	private String udn;
@@ -21,9 +19,7 @@ public class HueBridge implements CallbackListener {
 	private String user;
 
 	private AlConfig config;
-	private HueThread t;
-
-	private HueController controller;
+	private HueThread hueThread;
 
 	private static final String CLASS_NAME = HueBridge.class.getCanonicalName();
 
@@ -33,7 +29,7 @@ public class HueBridge implements CallbackListener {
 
 		config = AlConfig.getExistingInstance();
 
-		t = new HueThread();
+		hueThread = new HueThread();
 
 		this.isSupported = isSupported;
 		this.udn = udn;
@@ -54,24 +50,17 @@ public class HueBridge implements CallbackListener {
 		return urlBase;
 	}
 
-	public HueController getController() {
-		return controller;
-	}
 
-	public void setController(HueController controller) {
-		this.controller = controller;
-	}
-
-	public List<HueLight> getLightNames() {
+	public List<HueLight> getLightNames() throws HueException {
 		MyLog.entering(CLASS_NAME, "getLightNames");
 
 		readConfig();
 		HueLightNamesMessage message = new HueLightNamesMessage();
 
-		t.pushMessage(message); // replace this with EmptyCallbackListenerObj
+		hueThread.pushMessage(message); // replace this with EmptyCallbackListenerObj
 
 
-		List<HueLight> lights = parseLights(t.getResult());
+		List<HueLight> lights = parseLights(hueThread.getResult());
 		MyLog.exiting(CLASS_NAME, "getLightNames", lights);
 		return lights;
 	}
@@ -81,9 +70,40 @@ public class HueBridge implements CallbackListener {
 		boolean userOk = (user != null) && (!user.isEmpty());
 		boolean urlBaseOk = (urlBase != null) && (!urlBase.isEmpty());
 
+		// not checking if our user is whitelisted - will notice that if the read action fails
+
 		boolean isConnected = userOk && urlBaseOk;
 		MyLog.exiting(CLASS_NAME, "isConnected", isConnected);
 		return isConnected;
+	}
+
+	private boolean isUserWhitelisted(String user, HueConfig config) {
+		MyLog.entering(CLASS_NAME, "isUserWhitelisted", user, config);
+
+		boolean isUserWhitelisted = false;
+		List<HueUser> users = config.getUsers();
+
+		for (HueUser currUser : users) {
+			if (currUser.getId().equals(user)) {
+				isUserWhitelisted = true;
+				break;
+			}
+		}
+		MyLog.exiting(CLASS_NAME, "isUserWhitelisted", isUserWhitelisted);
+		return isUserWhitelisted;
+	}
+
+	private HueConfig readBridgeConfig() {
+		MyLog.entering(CLASS_NAME, "readBridgeConfig");
+
+		HueReadConfigMessage message = new HueReadConfigMessage();
+
+		JSONObject result = hueThread.pushMessage(message);
+		HueConfig config = new HueConfig();
+		config.updateConfigStatus(result);
+
+		MyLog.exiting(CLASS_NAME, "readBridgeConfig", config);
+		return config;
 	}
 
 	public JSONObject readLightState(HueLight light) {
@@ -91,7 +111,7 @@ public class HueBridge implements CallbackListener {
 
 		HueReadStateMessage message = new HueReadStateMessage(light);
 
-		JSONObject result = t.pushMessage(message);
+		JSONObject result = hueThread.pushMessage(message);
 
 		MyLog.exiting(CLASS_NAME, "readLightState", result);
 
@@ -103,12 +123,21 @@ public class HueBridge implements CallbackListener {
 
 		HueWriteStateMessage message = new HueWriteStateMessage(light, state);
 
-		t.pushMessage(message);
+		hueThread.pushMessage(message);
 
 		MyLog.exiting(CLASS_NAME, "writeLightState");
 	}
 
-	private List<HueLight> parseLights(JSONObject result) {
+	/**
+	 * got put in the bridge because it handles multiple lights
+	 * @param result
+	 * @return
+	 */
+	private List<HueLight> parseLights(JSONObject result) throws HueException {
+		HueError error = checkForError(result);
+		if(error != null) {
+			throw new HueException(error);
+		}
 		MyLog.entering(CLASS_NAME, "parseLights", result);
 		List<HueLight> lights = new LinkedList<HueLight>();
 		@SuppressWarnings("unchecked")
@@ -128,6 +157,8 @@ public class HueBridge implements CallbackListener {
 		return lights;
 	}
 
+
+
 	private void readConfig() {
 		MyLog.entering(CLASS_NAME, "readConfig");
 		user = config.getBridgeUser();
@@ -138,5 +169,26 @@ public class HueBridge implements CallbackListener {
 	public void callback(Object source) {
 		// TODO Auto-generated method stub
 
+	}
+
+	public void registerUser() throws HueException {
+		MyLog.entering(CLASS_NAME, "registerUser");
+
+		String devicetype = Constants.APPLICATION_NAME;
+
+		//TODO build username generator for added security
+		String username = user;
+
+		HueRegistrationMessage message = new HueRegistrationMessage(devicetype, username);
+
+		JSONObject result = hueThread.pushMessage(message);
+
+		HueError error = checkForError(result);
+
+		if(error != null) {
+			throw new HueException(error);
+		}
+
+		MyLog.exiting(CLASS_NAME, "registerUser", result);
 	}
 }

@@ -1,9 +1,6 @@
 package my.anlights;
 
-import my.anlights.data.HueBridge;
-import my.anlights.data.HueGroup;
-import my.anlights.data.HueLight;
-import my.anlights.data.HueState;
+import my.anlights.data.*;
 import my.anlights.util.MyLog;
 
 import java.util.List;
@@ -34,7 +31,12 @@ public class UpdateHueAction implements CallbackListener {
 			HueBridge bridge = discovery.getBridge();
 
 			if (bridge.isConnected()) {
-				List<HueLight> lights = bridge.getLightNames();
+				List<HueLight> lights = null;
+				try {
+					lights = bridge.getLightNames();
+				} catch (HueException e) {
+					MyLog.e("problem retrieving lightNames", e);
+				}
 
 				HueGroup hGroup = new HueGroup();
 				for (HueLight currLight : lights) {

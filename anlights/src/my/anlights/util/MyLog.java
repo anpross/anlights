@@ -7,23 +7,37 @@ package my.anlights.util;
 import android.util.Log;
 import my.anlights.Constants;
 
-public class MyLog {
+import java.util.Arrays;
 
-	private static final String TEMPLATE_ENTERING = "entering %1:%2(%3)";
-	private static final String TEMPLATE_EXITING = "exiting %1:%2(%3)";
+public class MyLog {
 
 	private static final int MAX_MESSAGE_LENGTH = 1024;
 
 	public static void entering(String className, String methodName, Object... parameters) {
-		if (Log.isLoggable(Constants.LOGGING_TAG, Log.DEBUG)) {
-			Log.d(Constants.LOGGING_TAG, String.format(TEMPLATE_ENTERING, className, methodName, parameters));
-		}
+		//if (Log.isLoggable(Constants.LOGGING_TAG, Log.DEBUG)) {
+		entryExit("entering ", className, methodName, parameters);
 	}
 
-	public static void exiting(String className, String methodName, Object... returnValue) {
-		if (Log.isLoggable(Constants.LOGGING_TAG, Log.DEBUG)) {
-			Log.d(Constants.LOGGING_TAG, String.format(TEMPLATE_EXITING, className, methodName, returnValue));
+	public static void exiting(String className, String methodName, Object... parameters) {
+		//if (Log.isLoggable(Constants.LOGGING_TAG, Log.DEBUG)) {
+		entryExit("exiting ", className, methodName, parameters);
+		//}
+	}
+
+	private static void entryExit(String entryExit,String className, String methodName, Object... parameters){
+		StringBuffer sb = new StringBuffer(entryExit);
+		sb.append(className).append(":").append(methodName).append("(");
+
+		if (parameters != null) {
+			for (int i = 0; i < parameters.length; i++) {
+				sb.append(parameters[i]);
+				if ((i + 1) < parameters.length) {
+					sb.append(", ");
+				}
+			}
 		}
+		sb.append(")");
+		Log.d(Constants.LOGGING_TAG, sb.toString());
 	}
 
 	public static void d(String message) {

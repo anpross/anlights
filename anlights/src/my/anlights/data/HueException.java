@@ -17,13 +17,13 @@ public class HueException extends Exception {
 
 	@Override
 	public String getMessage() {
-		return "problem occurred during hue communication, hue error: "+error.toString();
+		return "problem occurred during hue communication, hue error: " + error.toString();
 	}
 
 	public boolean isAuthProblem() {
-		MyLog.entering(CLASS_NAME,"isAuthProblem");
+		MyLog.entering(CLASS_NAME, "isAuthProblem");
 		boolean isAuthProb = false;
-		if(error != null && error.getType() == HueError.ERROR_UNAUTHORIZED){
+		if (error != null && (error.getType() == HueError.ERROR_UNAUTHORIZED || error.getType() == HueError.ERROR_BUTTON_NOT_PRESSED)) {
 			isAuthProb = true;
 		}
 		MyLog.exiting(CLASS_NAME, "isAuthProblem", isAuthProb);

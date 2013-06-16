@@ -9,5 +9,7 @@
     <string name="remote_service_started">service started</string>
     <string name="remote_service_stopped">service stopped</string>
     <string name="remote_service_label">AnLight Service</string>
+    <string name="register_dialog_title">HueBridge registration</string>
+    <string name="register_dialog_text">please press the Hue Button</string>
 
 </resources>

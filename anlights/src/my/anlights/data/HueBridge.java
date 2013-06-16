@@ -1,6 +1,9 @@
 package my.anlights.data;
 
-import my.anlights.*;
+import my.anlights.AlConfig;
+import my.anlights.CallbackListener;
+import my.anlights.Constants;
+import my.anlights.HueThread;
 import my.anlights.data.messages.*;
 import my.anlights.util.MyLog;
 import org.json.JSONException;
@@ -130,15 +133,16 @@ public class HueBridge extends HueObject implements CallbackListener {
 
 	/**
 	 * got put in the bridge because it handles multiple lights
+	 *
 	 * @param result
 	 * @return
 	 */
 	private List<HueLight> parseLights(JSONObject result) throws HueException {
+		MyLog.entering(CLASS_NAME, "parseLights", result);
 		HueError error = checkForError(result);
-		if(error != null) {
+		if (error != null) {
 			throw new HueException(error);
 		}
-		MyLog.entering(CLASS_NAME, "parseLights", result);
 		List<HueLight> lights = new LinkedList<HueLight>();
 		@SuppressWarnings("unchecked")
 		Iterator<String> iKeys = result.keys();
@@ -158,7 +162,6 @@ public class HueBridge extends HueObject implements CallbackListener {
 	}
 
 
-
 	private void readConfig() {
 		MyLog.entering(CLASS_NAME, "readConfig");
 		user = config.getBridgeUser();
@@ -171,9 +174,16 @@ public class HueBridge extends HueObject implements CallbackListener {
 
 	}
 
-	public void registerUser() throws HueException {
+	/**
+	 * returns true if the user registration was successfull
+	 *
+	 * @return
+	 * @throws HueException
+	 */
+	public boolean registerUser() throws HueException {
 		MyLog.entering(CLASS_NAME, "registerUser");
 
+		boolean registrationSuccessfull = false;
 		String devicetype = Constants.APPLICATION_NAME;
 
 		//TODO build username generator for added security
@@ -185,10 +195,11 @@ public class HueBridge extends HueObject implements CallbackListener {
 
 		HueError error = checkForError(result);
 
-		if(error != null) {
-			throw new HueException(error);
+		if (error == null) {
+			registrationSuccessfull = true;
 		}
 
-		MyLog.exiting(CLASS_NAME, "registerUser", result);
+		MyLog.exiting(CLASS_NAME, "registerUser", registrationSuccessfull);
+		return registrationSuccessfull;
 	}
 }

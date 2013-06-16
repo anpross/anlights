@@ -18,7 +18,7 @@ public class UserNameGenerator {
 
 	private static final int RANDOM_BIT_LENGTH = 96;
 	private static final int MAXIMUM_USERNAME_LENGTH = 40;
-	private static final char DIVIDER = '-';
+
 
 	private static final String CLASS_NAME = UserNameGenerator.class.getCanonicalName();
 
@@ -26,21 +26,22 @@ public class UserNameGenerator {
 		MyLog.entering(CLASS_NAME, "generateUserName");
 		SecureRandom random = new SecureRandom();
 
-		String hash = Base64.encodeToString(new BigInteger(RANDOM_BIT_LENGTH, random).toByteArray(), Base64.NO_PADDING);
+		String hash = Base64.encodeToString(new BigInteger(RANDOM_BIT_LENGTH, random).toByteArray(), Base64.URL_SAFE + Base64.NO_PADDING + Base64.NO_WRAP);
+		hash = hash.replace("-", ""); // no - allowed
+		hash = hash.replace("_", ""); // no _ allowed
 
-		// replacing spaces just because i don't like them
-		String device = Build.MODEL.replace(" ", "_");
+		// removing spaces just because i don't like them
+		String device = Build.MODEL.replace(" ", "");
 
-		// cutting device name in case its too long (longer then 14 chars)
+		// cutting device name in case its too long
 		if (Constants.LOGGING_TAG.length() + device.length() + hash.length() > MAXIMUM_USERNAME_LENGTH) {
-			// 2 = the two "-" divider
-			device = device.substring(0, MAXIMUM_USERNAME_LENGTH - Constants.LOGGING_TAG.length() - 2 - hash.length());
+
+			device = device.substring(0, MAXIMUM_USERNAME_LENGTH - Constants.LOGGING_TAG.length() - hash.length());
 		}
 
+		// sadly no dividers such as "-" or "_" are allowed
 		StringBuilder sb = new StringBuilder(Constants.LOGGING_TAG);
-		sb.append(DIVIDER);
 		sb.append(device);
-		sb.append(DIVIDER);
 		sb.append(hash);
 
 		String userName = sb.toString();

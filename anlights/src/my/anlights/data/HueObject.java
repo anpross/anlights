@@ -9,11 +9,14 @@ import org.json.JSONObject;
  */
 public class HueObject {
 
+	private final static String ERROR_ATTRIBUTE = "error";
+
 	protected HueError checkForError(JSONObject obj) {
 		HueError error = null;
 		try {
-			JSONObject errorObj = obj.getJSONObject("error");
-			if (errorObj != null) {
+			boolean hasErrorObj = obj.has(ERROR_ATTRIBUTE);
+			if (hasErrorObj) {
+				JSONObject errorObj = obj.getJSONObject(ERROR_ATTRIBUTE);
 				int type = errorObj.getInt("type");
 				String address = errorObj.getString("address");
 				String desc = errorObj.getString("description");

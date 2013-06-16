@@ -1,10 +1,12 @@
 package my.anlights;
 
-import android.app.Activity;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,17 +17,16 @@ import com.getpebble.android.kit.util.PebbleDictionary;
 import com.getpebble.android.kit.util.PebbleTuple;
 import my.anlights.data.*;
 import my.anlights.gui.LightView;
+import my.anlights.gui.RegistrationDialogFragment;
 import my.anlights.util.MyLog;
-import my.anlights.util.UserNameGenerator;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends Activity implements CallbackListener, OnClickListener, CompoundButton.OnCheckedChangeListener, LightView.OnLightStateChangeListener {
+public class MainActivity extends FragmentActivity implements CallbackListener<HueDiscoveryTask>, OnClickListener, CompoundButton.OnCheckedChangeListener, LightView.OnLightStateChangeListener, RegistrationDialogFragment.RegistrationDialogListener {
 
 	private HueGroup hGroup;
 	Switch onToggle;
@@ -51,13 +52,12 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 
 		super.onStart();
 
-		AlConfig.getInstance(this).setBridgeUser(Constants.BRIDGE_USER);
+		AlConfig.getInstance(this);
+
 		initBridge();
 
 		initUi();
 
-
-		final Handler handler = new Handler();
 		pebbleDataHandler = new PebbleKit.PebbleDataReceiver(Constants.PEBBLE_UUID) {
 
 			private final String CLASS_NAME = PebbleKit.PebbleDataReceiver.class.getCanonicalName();
@@ -65,7 +65,7 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 			@Override
 			public void receiveData(final Context context, final int transactionId, final PebbleDictionary data) {
 				MyLog.entering(CLASS_NAME, "receiveData", context, transactionId, data);
-				//int newState = data.getUnsignedInteger(Constants.SPORTS_STATE_KEY).intValue();                sportsState = newState;
+
 				MyLog.i("got data:" + data);
 
 				HueState state = new HueState();
@@ -87,7 +87,6 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 				}
 
 				PebbleKit.sendAckToPebble(context, transactionId);
-
 
 				setLightState(state);
 				MyLog.exiting(CLASS_NAME, "receiveData");
@@ -165,6 +164,9 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 				Intent intent = new Intent(this, SettingsActivity.class);
 				startActivity(intent);
 				return true;
+			case R.id.menu_discover:
+				doUserRegistration();
+				return true;
 			case R.id.onToggleSwitch:
 				MyLog.d("on toggle switch");
 				return true;
@@ -173,46 +175,50 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 		}
 	}
 
-	public void callback(Object source) {
-		MyLog.entering(CLASS_NAME, "callback", source);
-		if (source instanceof HueDiscoveryTask) {
-			HueDiscoveryTask discovery = (HueDiscoveryTask) source;
-			MyLog.d("discover done - base url:" + AlConfig.getExistingInstance().getBridgeUrlBase());
+	public void callback(HueDiscoveryTask discovery) {
+		MyLog.entering(CLASS_NAME, "callback", discovery);
 
-//			new HueLights().registerUser();
-			bridge = discovery.getBridge();
-			try{
-				if (bridge.isConnected()) {
-					List<HueLight> lights = bridge.getLightNames();
+		MyLog.d("discover done - base url:" + AlConfig.getExistingInstance().getBridgeUrlBase());
 
-					hGroup = new HueGroup();
-					for (HueLight currLight : lights) {
-						hGroup.addLight(currLight);
-					}
-					hGroup.readLightStatus();
+		bridge = discovery.getBridge();
+		try {
+			if (bridge.isConnected()) {
+				List<HueLight> lights = bridge.getLightNames();
 
-					updateControls();
-
-					MyLog.d("group state:" + hGroup.getLightState());
+				hGroup = new HueGroup();
+				for (HueLight currLight : lights) {
+					hGroup.addLight(currLight);
 				}
-			} catch (HueException e) {
-				if(e.isAuthProblem()){
-					MyLog.i("not authorized! - starting registration");
-					doUserRegistration();
-				} else {
-					MyLog.e("HueException",e);
-				}
+				hGroup.readLightStatus();
+
+				updateControls();
+
+				MyLog.d("group state:" + hGroup.getLightState());
+			}
+		} catch (HueException e) {
+			if (e.isAuthProblem()) {
+				MyLog.i("not authorized! - starting registration");
+				doUserRegistration();
+			} else {
+				MyLog.e("HueException", e);
 			}
 		}
+
 		MyLog.exiting(CLASS_NAME, "callback");
 	}
 
 	private void doUserRegistration() {
-		try {
-			bridge.registerUser();
-		} catch (HueException e) {
-			e.printStackTrace();
+
+		FragmentTransaction ft = getFragmentManager().beginTransaction();
+		Fragment prev = getFragmentManager().findFragmentByTag("registrationDialog");
+		if (prev != null) {
+			ft.remove(prev);
 		}
+		ft.addToBackStack(null);
+
+		RegistrationDialogFragment newFragment = RegistrationDialogFragment.newInstance();
+		newFragment.setBridge(bridge);
+		newFragment.show(ft, "registrationDialog");
 	}
 
 	private void updateControls() {
@@ -238,7 +244,7 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 			try {
 				toggleOnState();
 			} catch (HueException e) {
-				MyLog.e("problem toggeling on-state",e);
+				MyLog.e("problem toggeling on-state", e);
 			}
 		} else if (v.equals(onHelloPebble)) {
 			sendAlertToPebble();
@@ -253,7 +259,7 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 			try {
 				setOnState(onState);
 			} catch (HueException e) {
-				MyLog.e("problem setting on-state",e);
+				MyLog.e("problem setting on-state", e);
 			}
 		}
 		MyLog.exiting(CLASS_NAME, "onCheckedChanged");
@@ -292,7 +298,7 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 		}
 	}
 
-	public void setOnState(boolean newOnState) throws HueException{
+	public void setOnState(boolean newOnState) throws HueException {
 		MyLog.entering(CLASS_NAME, "setOnState", newOnState);
 		if (hGroup != null) {
 			HueState newState = new HueState();
@@ -301,7 +307,9 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 			hGroup.setLightState(newState);
 			hGroup.readLightStatus();
 		} else {
-			MyLog.e("no lightgroup to set state to");
+			MyLog.e("no lightgroup to set state to - re-initializing bridge");
+			onToggle.setChecked(!onToggle.isChecked());
+			initBridge();
 			Toast.makeText(getApplicationContext(), "no lightgroup", Toast.LENGTH_SHORT).show();
 		}
 		MyLog.exiting(CLASS_NAME, "setOnState");
@@ -312,8 +320,9 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 		if (hGroup != null) {
 			hGroup.setLightState(newState);
 		} else {
+			MyLog.e("no lightgroup to set state to - re-initializing bridge");
 			onToggle.setChecked(!onToggle.isChecked());
-			MyLog.e("no lightgroup to set state to");
+			initBridge();
 			Toast.makeText(getApplicationContext(), "no lightgroup", Toast.LENGTH_SHORT).show();
 		}
 		MyLog.exiting(CLASS_NAME, "setLightState");
@@ -338,4 +347,16 @@ public class MainActivity extends Activity implements CallbackListener, OnClickL
 	}
 
 
+	@Override
+	public void onDialogRegistrationCancel(DialogFragment dialog) {
+		MyLog.entering(CLASS_NAME, "onDialogRegistrationCancel", dialog);
+		MyLog.exiting(CLASS_NAME, "onDialogRegistrationCancel");
+	}
+
+	@Override
+	public void onDialogRegistrationSuccess() {
+		MyLog.entering(CLASS_NAME, "onDialogRegistrationSuccess");
+		initBridge();
+		MyLog.exiting(CLASS_NAME, "onDialogRegistrationSuccess");
+	}
 }

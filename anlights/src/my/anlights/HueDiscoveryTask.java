@@ -183,6 +183,8 @@ public class HueDiscoveryTask extends AsyncTask<Void, Void, HueBridge> {
 		String udn = null;
 		String urlBase = null;
 
+		HueBridge newBridge = null;
+
 		initHttpClient();
 		initXmlReader();
 
@@ -204,6 +206,8 @@ public class HueDiscoveryTask extends AsyncTask<Void, Void, HueBridge> {
 				isSupported = descHandler.isHue();
 				udn = descHandler.getUdn();
 				urlBase = descHandler.getUrlBase();
+
+				newBridge = new HueBridge(isSupported, udn, urlBase);
 			}
 		} catch (SAXException e) {
 			MyLog.e("problem reading SSDP description", e);
@@ -212,7 +216,7 @@ public class HueDiscoveryTask extends AsyncTask<Void, Void, HueBridge> {
 		} catch (IOException e) {
 			MyLog.e("problem reading SSDP description", e);
 		}
-		HueBridge newBridge = new HueBridge(isSupported, udn, urlBase);
+
 		MyLog.exiting(CLASS_NAME, "readDescriptionXml", newBridge);
 		return newBridge;
 	}

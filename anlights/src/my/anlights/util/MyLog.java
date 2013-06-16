@@ -7,24 +7,30 @@ package my.anlights.util;
 import android.util.Log;
 import my.anlights.Constants;
 
-import java.util.Arrays;
-
 public class MyLog {
 
 	private static final int MAX_MESSAGE_LENGTH = 1024;
 
+	private static String currClass;
+
 	public static void entering(String className, String methodName, Object... parameters) {
-		//if (Log.isLoggable(Constants.LOGGING_TAG, Log.DEBUG)) {
-		entryExit("entering ", className, methodName, parameters);
+
+		currClass = className;
+		// entry / exit is for debugging
+		if (isLoggable(className, Log.DEBUG)) {
+			entryExit("entering ", className, methodName, parameters);
+		}
 	}
 
 	public static void exiting(String className, String methodName, Object... parameters) {
-		//if (Log.isLoggable(Constants.LOGGING_TAG, Log.DEBUG)) {
-		entryExit("exiting ", className, methodName, parameters);
-		//}
+
+		// entry / exit is for debugging
+		if (isLoggable(className, Log.DEBUG)) {
+			entryExit("exiting ", className, methodName, parameters);
+		}
 	}
 
-	private static void entryExit(String entryExit,String className, String methodName, Object... parameters){
+	private static void entryExit(String entryExit, String className, String methodName, Object... parameters) {
 		StringBuffer sb = new StringBuffer(entryExit);
 		sb.append(className).append(":").append(methodName).append("(");
 
@@ -41,18 +47,43 @@ public class MyLog {
 	}
 
 	public static void d(String message) {
-		Log.d(Constants.LOGGING_TAG, message);
+		if (isLoggable(currClass, Log.DEBUG)) {
+			Log.d(Constants.LOGGING_TAG, "  " + currClass + ": " + message);
+		}
 	}
 
 	public static void i(String message) {
-		Log.i(Constants.LOGGING_TAG, message);
+		if (isLoggable(currClass, Log.INFO)) {
+			Log.i(Constants.LOGGING_TAG, "  " + currClass + ": " + message);
+		}
 	}
 
 	public static void e(String message, Throwable e) {
-		Log.e(Constants.LOGGING_TAG, message, e);
+		if (isLoggable(currClass, Log.ERROR)) {
+			Log.e(Constants.LOGGING_TAG, message, e);
+		}
 	}
 
 	public static void e(String message) {
-		Log.e(Constants.LOGGING_TAG, message);
+		if (isLoggable(currClass, Log.ERROR)) {
+			Log.e(Constants.LOGGING_TAG, message);
+		}
+	}
+
+	/**
+	 * log no gui stuff but all errors
+	 *
+	 * @param className
+	 * @param severity
+	 * @return
+	 */
+	private static boolean isLoggable(String className, int severity) {
+		if (severity == Log.ERROR) {
+			return true;
+		} else if (className.startsWith("my.anlights.gui")) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

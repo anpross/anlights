@@ -15,5 +15,8 @@ public class Constants {
 	public static final String APPLICATION_NAME = "AnLight Client";
 
 	public static final UUID PEBBLE_UUID = UUID.fromString("EC555866-504F-41C0-91E0-D7EA491F0FEA");
-	public static final String BRIDGE_USER = "anlight123";
+	//public static final String BRIDGE_USER = "anlight223456";
+
+	public static final int REGISTRATION_DURATION_S = 15;
+	public static final int REGISTRATION_INTERVAL_MS = 1000;
 }

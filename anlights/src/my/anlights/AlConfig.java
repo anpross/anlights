@@ -3,6 +3,7 @@ package my.anlights;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import my.anlights.util.UserNameGenerator;
 
 
 public class AlConfig {
@@ -17,7 +18,11 @@ public class AlConfig {
 	private AlConfig(Context context) {
 		sp = PreferenceManager.getDefaultSharedPreferences(context);
 
-		bridgeUser = sp.getString("bridgeUser_preference", null);
+		bridgeUser = sp.getString("bridgeUser_preference", UserNameGenerator.generateUserName());
+
+		// store in case there was none before.
+		setBridgeUser(bridgeUser);
+
 		bridgeUrlBase = sp.getString("bridgeUrlBase_preference", null);
 		lastBridgeLocation = sp.getString("bridgeLastLocation_preference", null);
 	}

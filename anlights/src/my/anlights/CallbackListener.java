@@ -1,6 +1,6 @@
 package my.anlights;
 
-public interface CallbackListener {
+public interface CallbackListener<E> {
 
-	public void callback(Object source);
+	public void callback(E source);
 }

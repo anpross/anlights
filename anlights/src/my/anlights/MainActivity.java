@@ -1,9 +1,11 @@
 package my.anlights;
 
+import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -43,6 +45,28 @@ public class MainActivity extends FragmentActivity implements CallbackListener<H
 	public void onCreate(Bundle savedInstanceState) {
 		MyLog.entering(CLASS_NAME, "onCreate", savedInstanceState);
 		super.onCreate(savedInstanceState);
+
+		AlConfig.getInstance(this);
+
+		if (savedInstanceState == null || savedInstanceState.isEmpty()) {
+			initBridge();
+		} else {
+			bridge = savedInstanceState.getParcelable(Constants.PARCEL_KEY_BRIDGE);
+
+			HueLight[] lightsArray = (HueLight[]) savedInstanceState.getParcelableArray(Constants.PARCEL_KEY_LIGHTS);
+
+			hGroup = new HueGroup();
+
+			for (HueLight currLight : lightsArray) {
+
+				//noinspection deprecation - only use this method here
+				currLight.setBridge(bridge);
+
+				hGroup.addLight(currLight);
+
+			}
+		}
+
 		MyLog.exiting(CLASS_NAME, "onCreate");
 	}
 
@@ -52,11 +76,9 @@ public class MainActivity extends FragmentActivity implements CallbackListener<H
 
 		super.onStart();
 
-		AlConfig.getInstance(this);
-
-		initBridge();
 
 		initUi();
+
 
 		pebbleDataHandler = new PebbleKit.PebbleDataReceiver(Constants.PEBBLE_UUID) {
 
@@ -106,17 +128,27 @@ public class MainActivity extends FragmentActivity implements CallbackListener<H
 	}
 
 	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		MyLog.entering(CLASS_NAME, "onSaveInstanceState", outState);
+		outState.putParcelable(Constants.PARCEL_KEY_BRIDGE, bridge);
+
+		//noinspection deprecation - this method is ment for usage only here
+		outState.putParcelableArray(Constants.PARCEL_KEY_LIGHTS, hGroup.getLights().toArray(new HueLight[0]));
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
 	protected void onDestroy() {
 		MyLog.entering(CLASS_NAME, "onDestroy");
-		// TODO Auto-generated method stub
+
 		super.onDestroy();
+
 		MyLog.exiting(CLASS_NAME, "onDestroy");
 	}
 
 	@Override
 	protected void onPause() {
 		MyLog.entering(CLASS_NAME, "onPause");
-		// TODO Auto-generated method stub
 		super.onPause();
 
 		// Always deregister any Activity-scoped BroadcastReceivers when the Activity is paused
@@ -146,6 +178,7 @@ public class MainActivity extends FragmentActivity implements CallbackListener<H
 		if (actionView instanceof LinearLayout) {
 			onToggle = (Switch) actionView.findViewById(R.id.onToggleSwitch);
 			onToggle.setOnCheckedChangeListener(this);
+			updateControls();
 		}
 
 		boolean menuCreated = true;
@@ -181,8 +214,31 @@ public class MainActivity extends FragmentActivity implements CallbackListener<H
 		MyLog.d("discover done - base url:" + AlConfig.getExistingInstance().getBridgeUrlBase());
 
 		bridge = discovery.getBridge();
+
+		if (bridge != null) {
+			initHueGroup();
+		} else {
+			AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+			builder.setMessage(R.string.COULD_NOT_FIND_BRIDGE);
+			builder.setTitle(getString(R.string.COULD_NOT_FIND_BRIDGE_DIALOG_TITLE));
+			builder.setPositiveButton(R.string.OK, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int id) {
+					dialog.cancel();
+				}
+			});
+			builder.show();
+
+// 3. Get the AlertDialog from create()
+			AlertDialog dialog = builder.create();
+		}
+
+		MyLog.exiting(CLASS_NAME, "callback");
+	}
+
+	private void initHueGroup() {
 		try {
-			if (bridge.isConnected()) {
+			if (bridge != null && bridge.isConnected()) {
 				List<HueLight> lights = bridge.getLightNames();
 
 				hGroup = new HueGroup();
@@ -203,8 +259,6 @@ public class MainActivity extends FragmentActivity implements CallbackListener<H
 				MyLog.e("HueException", e);
 			}
 		}
-
-		MyLog.exiting(CLASS_NAME, "callback");
 	}
 
 	private void doUserRegistration() {
@@ -274,6 +328,10 @@ public class MainActivity extends FragmentActivity implements CallbackListener<H
 				HueState newState = new HueState();
 				newState.setBri(brightness);
 				newState.setCt(temperature + 154);
+
+				newState.setOn(true);
+				onToggle.setChecked(true);
+
 				hGroup.setLightState(newState);
 			}
 		} else {

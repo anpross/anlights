@@ -67,5 +67,15 @@ public class HueGroup {
 		MyLog.exiting(CLASS_NAME, "readLightStatus");
 	}
 
+	/**
+	 * really only needed for serialization
+	 *
+	 * @return
+	 */
+	@Deprecated
+	public List<HueLight> getLights() {
+		return lights;
+	}
+
 
 }

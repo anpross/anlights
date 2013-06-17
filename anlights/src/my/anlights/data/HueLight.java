@@ -1,11 +1,13 @@
 package my.anlights.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import my.anlights.util.MyLog;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
-public class HueLight extends HueObject {
+public class HueLight extends HueObject implements Parcelable {
 
 	// using all objects to have a null state
 	private String id;
@@ -20,10 +22,43 @@ public class HueLight extends HueObject {
 
 	private static final String CLASS_NAME = HueLight.class.getCanonicalName();
 
+	@SuppressWarnings("UnusedDeclaration")
+	public static final Parcelable.Creator<HueLight> CREATOR = new Parcelable.Creator<HueLight>() {
+		public HueLight createFromParcel(Parcel in) {
+			return new HueLight(in);
+		}
+
+		public HueLight[] newArray(int size) {
+			return new HueLight[size];
+		}
+	};
+
 	public HueLight() {
 		MyLog.entering(CLASS_NAME, "HueLight");
 		state = new HueState();
 		MyLog.exiting(CLASS_NAME, "HueLight");
+	}
+
+	public HueLight(Parcel in) {
+		id = in.readString();
+		name = in.readString();
+		state = in.readParcelable(ClassLoader.getSystemClassLoader());
+		type = in.readString();
+		modelId = in.readString();
+		swVersion = in.readString();
+		pointSymbol = in.readParcelable(ClassLoader.getSystemClassLoader());
+
+		//TODO: how to get the bridge?
+	}
+
+	/**
+	 * only use for deserialization
+	 *
+	 * @param bridge
+	 */
+	@Deprecated
+	public void setBridge(HueBridge bridge) {
+		this.bridge = bridge;
 	}
 
 	public HueLight(String id, String name, HueBridge bridge) {
@@ -154,9 +189,18 @@ public class HueLight extends HueObject {
 		updateLightStatus(lightJson);
 	}
 
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel parcel, int i) {
+
+	}
 }
 
-class PointSymbol {
+class PointSymbol implements Parcelable{
 
 	String value1;
 	String value2;
@@ -166,6 +210,28 @@ class PointSymbol {
 	String value6;
 	String value7;
 	String value8;
+
+	@SuppressWarnings("UnusedDeclaration")
+	public static final Parcelable.Creator<PointSymbol> CREATOR = new Parcelable.Creator<PointSymbol>() {
+		public PointSymbol createFromParcel(Parcel in) {
+			return new PointSymbol(in);
+		}
+
+		public PointSymbol[] newArray(int size) {
+			return new PointSymbol[size];
+		}
+	};
+
+	public PointSymbol(Parcel in) {
+		value1 = in.readString();
+		value2 = in.readString();
+		value3 = in.readString();
+		value4 = in.readString();
+		value5 = in.readString();
+		value6 = in.readString();
+		value7 = in.readString();
+		value8 = in.readString();
+	}
 
 	public PointSymbol(JSONObject pointSymbol) {
 		try {
@@ -246,4 +312,20 @@ class PointSymbol {
 		this.value8 = value8;
 	}
 
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel parcel, int i) {
+		parcel.writeString(value1);
+		parcel.writeString(value2);
+		parcel.writeString(value3);
+		parcel.writeString(value4);
+		parcel.writeString(value5);
+		parcel.writeString(value6);
+		parcel.writeString(value7);
+		parcel.writeString(value8);
+	}
 }

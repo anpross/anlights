@@ -1,7 +1,8 @@
 package my.anlights.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import my.anlights.AlConfig;
-import my.anlights.CallbackListener;
 import my.anlights.Constants;
 import my.anlights.HueThread;
 import my.anlights.data.messages.*;
@@ -14,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public class HueBridge extends HueObject implements CallbackListener {
+public class HueBridge extends HueObject implements Parcelable {
 
 	private boolean isSupported = false;
 	private String udn;
@@ -25,6 +26,26 @@ public class HueBridge extends HueObject implements CallbackListener {
 	private HueThread hueThread;
 
 	private static final String CLASS_NAME = HueBridge.class.getCanonicalName();
+
+	@SuppressWarnings("UnusedDeclaration")
+	public static final Parcelable.Creator<HueBridge> CREATOR = new Parcelable.Creator<HueBridge>() {
+		public HueBridge createFromParcel(Parcel in) {
+			return new HueBridge(in);
+		}
+
+		public HueBridge[] newArray(int size) {
+			return new HueBridge[size];
+		}
+	};
+
+	public HueBridge(Parcel in) {
+
+		isSupported = (in.readInt() == 1);
+		udn = in.readString();
+		urlBase = in.readString();
+		user = in.readString();
+
+	}
 
 	public HueBridge(boolean isSupported, String udn, String urlBase) {
 		MyLog.entering(CLASS_NAME, "HueBridge", isSupported, udn, urlBase);
@@ -169,11 +190,6 @@ public class HueBridge extends HueObject implements CallbackListener {
 		MyLog.exiting(CLASS_NAME, "readConfig");
 	}
 
-	public void callback(Object source) {
-		// TODO Auto-generated method stub
-
-	}
-
 	/**
 	 * returns true if the user registration was successfull
 	 *
@@ -201,5 +217,19 @@ public class HueBridge extends HueObject implements CallbackListener {
 
 		MyLog.exiting(CLASS_NAME, "registerUser", registrationSuccessfull);
 		return registrationSuccessfull;
+	}
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel parcel, int i) {
+
+		parcel.writeInt(isSupported ? 1 : 0);
+		parcel.writeString(udn);
+		parcel.writeString(urlBase);
+		parcel.writeString(user);
 	}
 }

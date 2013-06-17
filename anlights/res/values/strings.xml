@@ -11,5 +11,10 @@
     <string name="remote_service_label">AnLight Service</string>
     <string name="register_dialog_title">HueBridge registration</string>
     <string name="register_dialog_text">please press the Hue Button</string>
+    <string name="COULD_NOT_FIND_BRIDGE">SSDP discovery did not find a HueBridge. Please check that the bridge is
+        plugged in and in the same local network as you are.
+    </string>
+    <string name="COULD_NOT_FIND_BRIDGE_DIALOG_TITLE">no Bridge found</string>
+    <string name="OK">OK</string>
 
 </resources>

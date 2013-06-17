@@ -140,7 +140,9 @@ public class HueDiscoveryTask extends AsyncTask<Void, Void, HueBridge> {
 		MyLog.entering(CLASS_NAME, "onPostExecute", result);
 		this.bridge = result;
 		super.onPostExecute(result);
-		AlConfig.getExistingInstance().setBridgeUrlBase(result.getUrlBase());
+		if (result != null) {
+			AlConfig.getExistingInstance().setBridgeUrlBase(result.getUrlBase());
+		}
 		callback.callback(this);
 		MyLog.exiting(CLASS_NAME, "onPostExecute");
 	}

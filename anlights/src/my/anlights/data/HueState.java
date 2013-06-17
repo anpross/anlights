@@ -59,6 +59,7 @@ public class HueState implements Parcelable {
 		this.reachable = otherState.reachable;
 	}
 
+	@SuppressWarnings("UnusedDeclaration")
 	public static final Parcelable.Creator<HueState> CREATOR
 			= new Parcelable.Creator<HueState>() {
 		public HueState createFromParcel(Parcel in) {

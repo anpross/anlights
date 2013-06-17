@@ -19,4 +19,7 @@ public class Constants {
 
 	public static final int REGISTRATION_DURATION_S = 15;
 	public static final int REGISTRATION_INTERVAL_MS = 1000;
+
+	public static final String PARCEL_KEY_LIGHTS = "lights";
+	public static final String PARCEL_KEY_BRIDGE = "bridge";
 }

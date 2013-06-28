@@ -15,11 +15,14 @@ public class Constants {
 	public static final String APPLICATION_NAME = "AnLight Client";
 
 	public static final UUID PEBBLE_UUID = UUID.fromString("EC555866-504F-41C0-91E0-D7EA491F0FEA");
-	//public static final String BRIDGE_USER = "anlight223456";
 
-	public static final int REGISTRATION_DURATION_S = 15;
-	public static final int REGISTRATION_INTERVAL_MS = 1000;
+    // the duration the application is polling the bridge in seconds
+    public static final int REGISTRATION_DURATION_S = 15;
 
-	public static final String PARCEL_KEY_LIGHTS = "lights";
+    // the duration between single polls to the bridge
+    public static final int REGISTRATION_INTERVAL_MS = 1000;
+
+    // keys used to serialize and de-serialize the application state
+    public static final String PARCEL_KEY_LIGHTS = "lights";
 	public static final String PARCEL_KEY_BRIDGE = "bridge";
 }

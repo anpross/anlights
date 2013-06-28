@@ -2,17 +2,23 @@ package my.anlights.data;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import my.anlights.AlConfig;
-import my.anlights.Constants;
-import my.anlights.HueThread;
-import my.anlights.data.messages.*;
-import my.anlights.util.MyLog;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import my.anlights.AlConfig;
+import my.anlights.Constants;
+import my.anlights.HueThread;
+import my.anlights.data.messages.HueLightNamesMessage;
+import my.anlights.data.messages.HueReadConfigMessage;
+import my.anlights.data.messages.HueReadStateMessage;
+import my.anlights.data.messages.HueRegistrationMessage;
+import my.anlights.data.messages.HueWriteStateMessage;
+import my.anlights.util.MyLog;
 
 
 public class HueBridge extends HueObject implements Parcelable {
@@ -117,8 +123,8 @@ public class HueBridge extends HueObject implements Parcelable {
 		return isUserWhitelisted;
 	}
 
-	private HueConfig readBridgeConfig() {
-		MyLog.entering(CLASS_NAME, "readBridgeConfig");
+    public HueConfig getBridgeConfig() {
+        MyLog.entering(CLASS_NAME, "readBridgeConfig");
 
 		HueReadConfigMessage message = new HueReadConfigMessage();
 

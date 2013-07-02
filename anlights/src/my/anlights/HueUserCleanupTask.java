@@ -6,6 +6,7 @@ import java.util.List;
 
 import my.anlights.data.HueBridge;
 import my.anlights.data.HueUser;
+import my.anlights.data.messages.HueDeleteUserMessage;
 import my.anlights.util.MyLog;
 
 /**
@@ -21,22 +22,36 @@ public class HueUserCleanupTask extends AsyncTask<Void, Void, Void> {
     private HueBridge bridge;
     private static String CLASS_NAME = HueUserCleanupTask.class.getCanonicalName();
 
-    public void setBridge(HueBridge bridge) {
+	HueThread thread = new HueThread();
+
+	public void setBridge(HueBridge bridge) {
         this.bridge = bridge;
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
-        MyLog.entering(CLASS_NAME, "doInBackground");
+	    String activeUserId = AlConfig.getExistingInstance().getBridgeUser();
+	    MyLog.entering(CLASS_NAME, "doInBackground");
         List<HueUser> hueUsers = bridge.getBridgeConfig().getUsers();
         for (HueUser currUser : hueUsers) {
             MyLog.d("user:" + currUser.getId() + "; " + currUser.getName());
             if (currUser.getName().equals(Constants.APPLICATION_NAME)) {
                 MyLog.d("try to delete user:" + currUser.getId());
-                // do DELETE on /api/<username>/config/whitelist/{username
+
+	            // delete the active user last
+	            if (!currUser.getId().equals(activeUserId)) {
+		            // do DELETE on /api/<username>/config/whitelist/{username
+		            HueDeleteUserMessage message = new HueDeleteUserMessage(currUser.getId());
+		            thread.pushMessage(message);
+	            }
             }
         }
-        MyLog.exiting(CLASS_NAME, "doInBackground");
+
+	    // delete the active user last
+	    HueDeleteUserMessage message = new HueDeleteUserMessage(activeUserId);
+	    thread.pushMessage(message);
+
+	    MyLog.exiting(CLASS_NAME, "doInBackground");
         return null;
     }
 }

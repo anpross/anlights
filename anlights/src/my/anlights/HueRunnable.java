@@ -1,12 +1,9 @@
 package my.anlights;
 
-import my.anlights.data.*;
-import my.anlights.data.messages.*;
-import my.anlights.util.MyLog;
-import my.anlights.util.ParserHelper;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
@@ -16,6 +13,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+
+import my.anlights.data.HueLight;
+import my.anlights.data.HueState;
+import my.anlights.data.messages.HueDeleteUserMessage;
+import my.anlights.data.messages.HueLightNamesMessage;
+import my.anlights.data.messages.HueMessage;
+import my.anlights.data.messages.HueReadConfigMessage;
+import my.anlights.data.messages.HueReadStateMessage;
+import my.anlights.data.messages.HueRegistrationMessage;
+import my.anlights.data.messages.HueWriteStateMessage;
+import my.anlights.util.MyLog;
+import my.anlights.util.ParserHelper;
 
 import static junit.framework.Assert.assertNotNull;
 
@@ -31,6 +40,7 @@ public class HueRunnable implements Runnable {
 
 	private HueMessage message;
 
+	private final static String[] CONTENT_METHODS = new String[]{"POST", "PUT"};
 	private final static String CLASS_NAME = HueRunnable.class.getCanonicalName();
 
 	private void readConfig() {
@@ -73,6 +83,8 @@ public class HueRunnable implements Runnable {
 			processReadConfig((HueReadConfigMessage) message);
 		} else if (message instanceof HueRegistrationMessage) {
 			processRegistration((HueRegistrationMessage) message);
+		} else if (message instanceof HueDeleteUserMessage) {
+			processDeleteUser((HueDeleteUserMessage) message);
 		}
 		MyLog.exiting(CLASS_NAME, "processMessage");
 	}
@@ -92,7 +104,6 @@ public class HueRunnable implements Runnable {
 		MyLog.d("register json:" + register);
 
 		executePost(url, register);
-
 
 
 		MyLog.exiting(CLASS_NAME, "processRegistration");
@@ -115,6 +126,11 @@ public class HueRunnable implements Runnable {
 		String url = urlBase + "api/" + user + "/lights/" + light.getId() + "/state";
 
 		executePut(url, state.toJsonObject());
+	}
+
+	private void processDeleteUser(HueDeleteUserMessage message) {
+		String url = urlBase + "api/" + user + "/config/whitelist/" + message.getUser();
+		executeDelete(url);
 	}
 
 	// TODO refactor me
@@ -212,6 +228,36 @@ public class HueRunnable implements Runnable {
 		MyLog.exiting(CLASS_NAME, "executePost");
 	}
 
+	// TODO refactor me
+	private void executeDelete(String url) {
+		MyLog.entering(CLASS_NAME, "executeDelete", url);
+
+		readConfig();
+
+		if (httpClient == null) {
+			httpClient = new DefaultHttpClient();
+		}
+		HttpDelete delete = new HttpDelete(url);
+		try {
+			HttpResponse response = httpClient.execute(delete);
+			int retCode = response.getStatusLine().getStatusCode();
+			if (retCode == HttpStatus.SC_OK) {
+				String sResult = ParserHelper.readInputStream(response.getEntity().getContent());
+				sResult = ParserHelper.removeBrackets(sResult.trim());
+				MyLog.d("received response:\n" + sResult);
+				result = new JSONObject(sResult);
+			}
+		} catch (ClientProtocolException e) {
+			MyLog.e("ClientProtocolException during DELETE", e);
+		} catch (IOException e) {
+			MyLog.e("IOException during DELETE", e);
+		} catch (JSONException e) {
+			MyLog.e("problem parsing JSON from DELETE request", e);
+		}
+		MyLog.exiting(CLASS_NAME, "executeDelete");
+	}
+
+
 	private void processReadLightState(HueReadStateMessage message) {
 		MyLog.entering(CLASS_NAME, "processReadLightState", message);
 
@@ -233,4 +279,5 @@ public class HueRunnable implements Runnable {
 	public JSONObject getResult() {
 		return result;
 	}
+
 }

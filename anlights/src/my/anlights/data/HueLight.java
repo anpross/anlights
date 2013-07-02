@@ -1,10 +1,13 @@
 package my.anlights.data;
 
+import android.os.BadParcelableException;
 import android.os.Parcel;
 import android.os.Parcelable;
-import my.anlights.util.MyLog;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import my.anlights.util.MyLog;
 
 
 public class HueLight extends HueObject implements Parcelable {
@@ -40,13 +43,18 @@ public class HueLight extends HueObject implements Parcelable {
 	}
 
 	public HueLight(Parcel in) {
-		id = in.readString();
-		name = in.readString();
-		state = in.readParcelable(ClassLoader.getSystemClassLoader());
-		type = in.readString();
-		modelId = in.readString();
-		swVersion = in.readString();
-		pointSymbol = in.readParcelable(ClassLoader.getSystemClassLoader());
+		try {
+			id = in.readString();
+			name = in.readString();
+			state = in.readParcelable(ClassLoader.getSystemClassLoader());
+			type = in.readString();
+			modelId = in.readString();
+			swVersion = in.readString();
+			pointSymbol = in.readParcelable(ClassLoader.getSystemClassLoader());
+
+		} catch (BadParcelableException e) {
+			MyLog.e("old State was no good, e");
+		}
 
 		//TODO: how to get the bridge?
 	}

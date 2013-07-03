@@ -1,0 +1,30 @@
+<resources>
+    <string name="about_text">
+        version 0.1\n
+        - initial release\n
+        \n
+        AnLights is a simple Light control application for Android. It currently only supports the
+        Philips Hue lighting system.\n
+        \n
+        It provides simple one touch control of all your hue lights.\n
+        \n
+        Current limitations:\n
+        - it only connects to the first hue-bridge it finds\n
+        - it controls all lights at the same time\n
+        - it only allows to control brightness and color temperature\n
+        \n
+        On the up-side, this little functionality should be easy to use.\n
+        \n
+        Advanced topics:\n
+        Connecting to the hue bridge - In case the application is not already registered, the
+        registration process is automatically started either at startup or when a light update is
+        issued and the response indicates missing authorization.\n
+        \n
+        Deleting bridge users - When selecting this option, the application will delete all
+        white-listed hue users from the bridge that where created by anlights. This will also
+        include users created by other devices.\n
+        \n
+        Disclaimer:\n
+        This application is provided as-is - no warranties bla bla.\n
+    </string>
+</resources>

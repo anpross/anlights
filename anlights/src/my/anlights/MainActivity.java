@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -226,6 +227,24 @@ public class MainActivity extends Activity implements CallbackListener<HueDiscov
     }
 
     private void showAboutDialog() {
+	    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	    LayoutInflater inflater = getLayoutInflater();
+
+	    View v = inflater.inflate(R.layout.fragment_about_dialog, null);
+	    builder.setView(v);
+	    builder.setTitle(R.string.register_dialog_title);
+
+	    AlertDialog dialog;
+	    builder.setNeutralButton("ok", new DialogInterface.OnClickListener() {
+		    @Override
+		    public void onClick(DialogInterface dialogInterface, int i) {
+			    MyLog.i("neutral button pressed");
+		    }
+	    });
+
+	    dialog = builder.create();
+
+	    dialog.show();
 
     }
 

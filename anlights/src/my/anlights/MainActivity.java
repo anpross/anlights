@@ -77,14 +77,13 @@ public class MainActivity extends Activity implements CallbackListener<HueDiscov
 				    currLight.setBridge(bridge);
 
 				    hGroup.addLight(currLight);
-
 			    }
 		    }
+	    }
 
-		    // init if we don't have a good state
-		    if (hGroup == null) {
-			    initBridge();
-		    }
+	    // init if we don't have a good state
+	    if (hGroup == null) {
+		    initBridge();
 	    }
 
 	    // not yet sure how to show the retained dialog in case one exists

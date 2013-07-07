@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,8 +21,6 @@ import android.widget.Switch;
 import android.widget.Toast;
 
 import com.getpebble.android.kit.PebbleKit;
-import com.getpebble.android.kit.util.PebbleDictionary;
-import com.getpebble.android.kit.util.PebbleTuple;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -40,10 +38,14 @@ import my.anlights.gui.LightView;
 import my.anlights.gui.RegistrationDialogFragment;
 import my.anlights.util.MyLog;
 
-public class MainActivity extends Activity implements CallbackListener<HueDiscoveryTask>, OnClickListener, CompoundButton.OnCheckedChangeListener, LightView.OnLightStateChangeListener, RegistrationDialogFragment.RegistrationDialogListener {
+public class MainActivity extends Activity implements CallbackListener<HueDiscoveryTask>,
+		OnClickListener,
+		CompoundButton.OnCheckedChangeListener,
+		LightView.OnLightStateChangeListener,
+		RegistrationDialogFragment.RegistrationDialogListener {
 
-    private HueGroup hGroup;
-    Switch onToggle;
+	private HueGroup hGroup;
+	Switch onToggle;
     Button onHelloPebble;
     LightView lightView;
 
@@ -60,26 +62,39 @@ public class MainActivity extends Activity implements CallbackListener<HueDiscov
 
         AlConfig.getInstance(this);
 
-        if (savedInstanceState == null || savedInstanceState.isEmpty()) {
-            initBridge();
-        } else {
-            bridge = savedInstanceState.getParcelable(Constants.PARCEL_KEY_BRIDGE);
+	    // can we restore a state?
+	    if (savedInstanceState != null && !savedInstanceState.isEmpty()) {
+		    bridge = savedInstanceState.getParcelable(Constants.PARCEL_KEY_BRIDGE);
 
-            HueLight[] lightsArray = (HueLight[]) savedInstanceState.getParcelableArray(Constants.PARCEL_KEY_LIGHTS);
+		    HueLight[] lightsArray = (HueLight[]) savedInstanceState.getParcelableArray(Constants.PARCEL_KEY_LIGHTS);
 
-            hGroup = new HueGroup();
+		    if (lightsArray != null) {
+			    hGroup = new HueGroup();
 
-            for (HueLight currLight : lightsArray) {
+			    for (HueLight currLight : lightsArray) {
 
-                //noinspection deprecation - only use this method here
-                currLight.setBridge(bridge);
+				    //noinspection deprecation - only use this method here
+				    currLight.setBridge(bridge);
 
-                hGroup.addLight(currLight);
+				    hGroup.addLight(currLight);
 
-            }
-        }
+			    }
+		    }
 
-        MyLog.exiting(CLASS_NAME, "onCreate");
+		    // init if we don't have a good state
+		    if (hGroup == null) {
+			    initBridge();
+		    }
+	    }
+
+	    // not yet sure how to show the retained dialog in case one exists
+	    FragmentManager fm = getFragmentManager();
+	    RegistrationDialogFragment regTaskFragment = (RegistrationDialogFragment) fm.findFragmentByTag(getString(R.string.FRAGMENT_TAG_REGISTRATION));
+	    if (regTaskFragment != null) {
+		    MyLog.i("we have a registration dialog pending");
+	    }
+
+	    MyLog.exiting(CLASS_NAME, "onCreate");
     }
 
     @Override
@@ -88,55 +103,24 @@ public class MainActivity extends Activity implements CallbackListener<HueDiscov
 
         super.onStart();
 
-
         initUi();
 
+	    pebbleDataHandler = new AnLightPebbleDataReceiver(Constants.PEBBLE_UUID);
+	    PebbleKit.registerReceivedDataHandler(this, pebbleDataHandler);
 
-        pebbleDataHandler = new PebbleKit.PebbleDataReceiver(Constants.PEBBLE_UUID) {
+	    MyLog.exiting(CLASS_NAME, "onStart");
 
-            private final String CLASS_NAME = PebbleKit.PebbleDataReceiver.class.getCanonicalName();
-
-            @Override
-            public void receiveData(final Context context, final int transactionId, final PebbleDictionary data) {
-                MyLog.entering(CLASS_NAME, "receiveData", context, transactionId, data);
-
-                MyLog.i("got data:" + data);
-
-                HueState state = new HueState();
-                for (PebbleTuple currTuple : data) {
-                    Integer currKey = currTuple.key;
-                    Long currValue = (Long) currTuple.value;
-
-                    if (currKey == PebbleConstants.ONOFF_KEY) {
-                        if (currValue == PebbleConstants.ONOFF_VALUE_ON) {
-                            state.setOn(true);
-                        } else if (currValue == PebbleConstants.ONOFF_VALUE_OFF) {
-                            state.setOn(false);
-                        }
-                    } else if (currKey == PebbleConstants.BRIGHTNESS_KEY) {
-                        state.setBri((int) (currValue * 255 / 100));
-                    } else if (currKey == PebbleConstants.TEMP_KEY) {
-                        state.setCt((int) (154 + (currValue * 346 / 100)));
-                    }
-                }
-
-                PebbleKit.sendAckToPebble(context, transactionId);
-
-                setLightState(state);
-                MyLog.exiting(CLASS_NAME, "receiveData");
-            }
-        };
-        PebbleKit.registerReceivedDataHandler(this, pebbleDataHandler);
-        MyLog.exiting(CLASS_NAME, "onStart");
     }
 
 
     private void initBridge() {
         MyLog.entering(CLASS_NAME, "initBridge");
-        HueDiscoveryTask discovery = new HueDiscoveryTask();
-        discovery.setCallback(this);
-        discovery.execute();
-        MyLog.exiting(CLASS_NAME, "initBridge");
+
+	    HueDiscoveryTask discovery = new HueDiscoveryTask();
+	    discovery.setCallback(this);
+	    discovery.execute();
+
+	    MyLog.exiting(CLASS_NAME, "initBridge");
     }
 
     @Override
@@ -144,12 +128,17 @@ public class MainActivity extends Activity implements CallbackListener<HueDiscov
         MyLog.entering(CLASS_NAME, "onSaveInstanceState", outState);
         outState.putParcelable(Constants.PARCEL_KEY_BRIDGE, bridge);
 
-
         MyLog.d("outstate:" + outState);
         MyLog.d("hgroup:" + hGroup);
-        //noinspection deprecation - this method is ment for usage only here
-        outState.putParcelableArray(Constants.PARCEL_KEY_LIGHTS, hGroup.getLights().toArray(new HueLight[0]));
-        super.onSaveInstanceState(outState);
+
+	    //noinspection deprecation - this method is ment for usage only here
+	    if (hGroup != null) {
+		    List<HueLight> currLights = hGroup.getLights();
+		    if (currLights != null) {
+			    outState.putParcelableArray(Constants.PARCEL_KEY_LIGHTS, currLights.toArray(new HueLight[0]));
+		    }
+	    }
+	    super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -232,7 +221,7 @@ public class MainActivity extends Activity implements CallbackListener<HueDiscov
 
 	    View v = inflater.inflate(R.layout.fragment_about_dialog, null);
 	    builder.setView(v);
-	    builder.setTitle(R.string.register_dialog_title);
+	    builder.setTitle(R.string.about_dialog_title);
 
 	    AlertDialog dialog;
 	    builder.setNeutralButton("ok", new DialogInterface.OnClickListener() {
@@ -309,15 +298,15 @@ public class MainActivity extends Activity implements CallbackListener<HueDiscov
     private void doUserRegistration() {
 
         FragmentTransaction ft = getFragmentManager().beginTransaction();
-        Fragment prev = getFragmentManager().findFragmentByTag("registrationDialog");
-        if (prev != null) {
-            ft.remove(prev);
+	    Fragment prev = getFragmentManager().findFragmentByTag(getString(R.string.FRAGMENT_TAG_REGISTRATION));
+	    if (prev != null) {
+		    ft.remove(prev);
         }
         ft.addToBackStack(null);
 
         RegistrationDialogFragment newFragment = RegistrationDialogFragment.newInstance();
         newFragment.setBridge(bridge);
-        newFragment.show(ft, "registrationDialog");
+	    newFragment.show(ft, getString(R.string.FRAGMENT_TAG_REGISTRATION));
     }
 
     private void updateControls() {

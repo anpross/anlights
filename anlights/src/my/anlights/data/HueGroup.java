@@ -28,7 +28,7 @@ public class HueGroup {
     /**
      * returns a new HueState with all fields that are common to the group members
      *
-     * @return
+     * @return the generated HueState
      */
     public HueState getLightState() {
         MyLog.entering(CLASS_NAME, "getLightState");
@@ -77,7 +77,7 @@ public class HueGroup {
     /**
      * really only needed for serialization
      *
-     * @return
+     * @return list of all HueLights
      */
     @Deprecated
     public List<HueLight> getLights() {

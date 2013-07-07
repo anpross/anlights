@@ -1,12 +1,12 @@
 package my.anlights.data;
 
-import my.anlights.util.MyLog;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.net.DatagramPacket;
+
+import my.anlights.util.MyLog;
 
 public class SsdpDevice {
 
@@ -31,8 +31,7 @@ public class SsdpDevice {
 		try {
 			parsePacket();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			MyLog.e("problem parsing DatagramPacket to SSDP Device", e);
 		}
 	}
 
@@ -53,7 +52,7 @@ public class SsdpDevice {
 				} else if (lable.equals(LABLE_SERVER)) {
 					server = value;
 				}
-//				System.out.println(lable+"->"+value);
+				MyLog.d(lable + "->" + value);
 			}
 			currLine = lnr.readLine();
 		}

@@ -8,6 +8,7 @@
             android:targetSdkVersion="17"/>
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
             android:icon="@drawable/anlights"
@@ -34,8 +35,8 @@
                 android:exported="true">
             <intent-filter>
                 <action android:name="com.getpebble.action.app.RECEIVE"/>
-                <action android:name="com.getpebble.action.PEBBLE_CONNECTED"></action>
-                <action android:name="com.getpebble.action.PEBBLE_DISCONNECTED"></action>
+                <action android:name="com.getpebble.action.PEBBLE_CONNECTED"/>
+                <action android:name="com.getpebble.action.PEBBLE_DISCONNECTED"/>
             </intent-filter>
         </receiver>
     </application>

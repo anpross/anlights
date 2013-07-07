@@ -20,5 +20,7 @@
     <string name="menu_clear_bridge_users">clear bridge users</string>
     <string name="menu_about">about anLights</string>
     <string name="menu_on_off_switch">on/off switch</string>
+    <string name="about_dialog_title">about AnLights</string>
+    <string name="FRAGMENT_TAG_REGISTRATION">registrationDialog</string>
 
 </resources>

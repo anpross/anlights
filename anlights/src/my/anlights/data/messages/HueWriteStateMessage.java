@@ -8,7 +8,6 @@ public class HueWriteStateMessage implements HueMessage {
 
 	private HueState state;
 	private HueLight light;
-	//	private int createTime;
 	private boolean important;
 	private int action;
 
@@ -33,12 +32,6 @@ public class HueWriteStateMessage implements HueMessage {
 		this.state = state;
 	}
 
-	//	public int getCreateTime() {
-//		return createTime;
-//	}
-//	public void setCreateTime(int createTime) {
-//		this.createTime = createTime;
-//	}
 	public boolean isImportant() {
 		return important;
 	}

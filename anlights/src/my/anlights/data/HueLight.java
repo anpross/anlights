@@ -9,7 +9,6 @@ import org.json.JSONObject;
 
 import my.anlights.util.MyLog;
 
-
 public class HueLight extends HueObject implements Parcelable {
 
 	// using all objects to have a null state
@@ -44,19 +43,24 @@ public class HueLight extends HueObject implements Parcelable {
 
 	public HueLight(Parcel in) {
 		try {
+			MyLog.d("reading id string");
 			id = in.readString();
+			MyLog.d("reading name string");
 			name = in.readString();
+			MyLog.d("reading state parcelable");
 			state = in.readParcelable(ClassLoader.getSystemClassLoader());
+			MyLog.d("reading type string");
 			type = in.readString();
+			MyLog.d("read modelID string");
 			modelId = in.readString();
+			MyLog.d("reading swVersion string");
 			swVersion = in.readString();
+			MyLog.d("reading point parcelable");
 			pointSymbol = in.readParcelable(ClassLoader.getSystemClassLoader());
 
 		} catch (BadParcelableException e) {
-			MyLog.e("old State was no good, e");
+			MyLog.e("old State was no good", e);
 		}
-
-		//TODO: how to get the bridge?
 	}
 
 	/**
@@ -208,7 +212,7 @@ public class HueLight extends HueObject implements Parcelable {
 	}
 }
 
-class PointSymbol implements Parcelable{
+class PointSymbol implements Parcelable {
 
 	String value1;
 	String value2;
@@ -218,6 +222,8 @@ class PointSymbol implements Parcelable{
 	String value6;
 	String value7;
 	String value8;
+
+	private static final String CLASS_NAME = PointSymbol.class.getCanonicalName();
 
 	@SuppressWarnings("UnusedDeclaration")
 	public static final Parcelable.Creator<PointSymbol> CREATOR = new Parcelable.Creator<PointSymbol>() {
@@ -231,6 +237,7 @@ class PointSymbol implements Parcelable{
 	};
 
 	public PointSymbol(Parcel in) {
+		MyLog.entering(CLASS_NAME, "PointSymbol", in);
 		value1 = in.readString();
 		value2 = in.readString();
 		value3 = in.readString();
@@ -239,6 +246,7 @@ class PointSymbol implements Parcelable{
 		value6 = in.readString();
 		value7 = in.readString();
 		value8 = in.readString();
+		MyLog.exiting(CLASS_NAME, "PointSymbol");
 	}
 
 	public PointSymbol(JSONObject pointSymbol) {

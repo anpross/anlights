@@ -123,8 +123,8 @@ public class HueBridge extends HueObject implements Parcelable {
 		return isUserWhitelisted;
 	}
 
-    public HueConfig getBridgeConfig() {
-        MyLog.entering(CLASS_NAME, "readBridgeConfig");
+	public HueConfig getBridgeConfig() {
+		MyLog.entering(CLASS_NAME, "readBridgeConfig");
 
 		HueReadConfigMessage message = new HueReadConfigMessage();
 
@@ -162,7 +162,7 @@ public class HueBridge extends HueObject implements Parcelable {
 	 * got put in the bridge because it handles multiple lights
 	 *
 	 * @param result
-	 * @return
+	 * @return the HueLights
 	 */
 	private List<HueLight> parseLights(JSONObject result) throws HueException {
 		MyLog.entering(CLASS_NAME, "parseLights", result);
@@ -197,18 +197,17 @@ public class HueBridge extends HueObject implements Parcelable {
 	}
 
 	/**
-	 * returns true if the user registration was successfull
+	 * returns true if the user registration was successful
 	 *
-	 * @return
+	 * @return registration outcome
 	 * @throws HueException
 	 */
 	public boolean registerUser() throws HueException {
 		MyLog.entering(CLASS_NAME, "registerUser");
 
-		boolean registrationSuccessfull = false;
+		boolean registrationSuccessful = false;
 		String devicetype = Constants.APPLICATION_NAME;
 
-		//TODO build username generator for added security
 		String username = user;
 
 		HueRegistrationMessage message = new HueRegistrationMessage(devicetype, username);
@@ -218,11 +217,11 @@ public class HueBridge extends HueObject implements Parcelable {
 		HueError error = checkForError(result);
 
 		if (error == null) {
-			registrationSuccessfull = true;
+			registrationSuccessful = true;
 		}
 
-		MyLog.exiting(CLASS_NAME, "registerUser", registrationSuccessfull);
-		return registrationSuccessfull;
+		MyLog.exiting(CLASS_NAME, "registerUser", registrationSuccessful);
+		return registrationSuccessful;
 	}
 
 	@Override

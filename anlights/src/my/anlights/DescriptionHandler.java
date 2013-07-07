@@ -1,14 +1,18 @@
 package my.anlights;
 
-import my.anlights.util.BufferedContentHandler;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 
-import javax.xml.namespace.QName;
 import java.util.Arrays;
 import java.util.Stack;
 
+import javax.xml.namespace.QName;
 
+import my.anlights.util.BufferedContentHandler;
+
+/**
+ * SAX handler to read SSDP xml
+ */
 public class DescriptionHandler extends BufferedContentHandler {
 
 	private Stack<QName> currElement = new Stack<QName>();
@@ -64,7 +68,7 @@ public class DescriptionHandler extends BufferedContentHandler {
 	/**
 	 * use UDN to identify different bridges
 	 *
-	 * @return
+	 * @return the UDN
 	 */
 	public String getUdn() {
 		return udn;

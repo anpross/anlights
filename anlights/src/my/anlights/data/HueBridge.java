@@ -45,12 +45,17 @@ public class HueBridge extends HueObject implements Parcelable {
 	};
 
 	public HueBridge(Parcel in) {
+		MyLog.entering(CLASS_NAME, "HueBridge", in);
+
+		config = AlConfig.getExistingInstance();
+		hueThread = new HueThread();
 
 		isSupported = (in.readInt() == 1);
 		udn = in.readString();
 		urlBase = in.readString();
 		user = in.readString();
 
+		MyLog.exiting(CLASS_NAME, "HueBridge");
 	}
 
 	public HueBridge(boolean isSupported, String udn, String urlBase) {
@@ -58,7 +63,6 @@ public class HueBridge extends HueObject implements Parcelable {
 
 
 		config = AlConfig.getExistingInstance();
-
 		hueThread = new HueThread();
 
 		this.isSupported = isSupported;

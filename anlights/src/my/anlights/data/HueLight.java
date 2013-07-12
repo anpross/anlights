@@ -48,7 +48,7 @@ public class HueLight extends HueObject implements Parcelable {
 			MyLog.d("reading name string");
 			name = in.readString();
 			MyLog.d("reading state parcelable");
-			state = in.readParcelable(ClassLoader.getSystemClassLoader());
+			state = in.readParcelable(HueState.class.getClassLoader());
 			MyLog.d("reading type string");
 			type = in.readString();
 			MyLog.d("read modelID string");
@@ -56,7 +56,7 @@ public class HueLight extends HueObject implements Parcelable {
 			MyLog.d("reading swVersion string");
 			swVersion = in.readString();
 			MyLog.d("reading point parcelable");
-			pointSymbol = in.readParcelable(ClassLoader.getSystemClassLoader());
+			pointSymbol = in.readParcelable(PointSymbol.class.getClassLoader());
 
 		} catch (BadParcelableException e) {
 			MyLog.e("old State was no good", e);
@@ -208,7 +208,20 @@ public class HueLight extends HueObject implements Parcelable {
 
 	@Override
 	public void writeToParcel(Parcel parcel, int i) {
-
+		MyLog.d("write id string");
+		parcel.writeString(id);
+		MyLog.d("write name string");
+		parcel.writeString(name);
+		MyLog.d("write state parcelable");
+		parcel.writeParcelable(state, i);
+		MyLog.d("write type string");
+		parcel.writeString(type);
+		MyLog.d("write modelId string");
+		parcel.writeString(modelId);
+		MyLog.d("write swVersion string");
+		parcel.writeString(swVersion);
+		MyLog.d("write pointSymbol parcelable");
+		parcel.writeParcelable(pointSymbol, i);
 	}
 }
 

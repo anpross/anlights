@@ -25,6 +25,7 @@ import com.getpebble.android.kit.PebbleKit;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,9 +65,13 @@ public class MainActivity extends Activity implements CallbackListener<HueDiscov
 
 	    // can we restore a state?
 	    if (savedInstanceState != null && !savedInstanceState.isEmpty()) {
+
+		    savedInstanceState.setClassLoader(getClassLoader());
+
 		    bridge = savedInstanceState.getParcelable(Constants.PARCEL_KEY_BRIDGE);
 
-		    HueLight[] lightsArray = (HueLight[]) savedInstanceState.getParcelableArray(Constants.PARCEL_KEY_LIGHTS);
+		    List<HueLight> lightsList = savedInstanceState.getParcelableArrayList(Constants.PARCEL_KEY_LIGHTS);
+		    HueLight[] lightsArray = lightsList.toArray(new HueLight[0]);
 
 		    if (lightsArray != null) {
 			    hGroup = new HueGroup();
@@ -132,9 +137,9 @@ public class MainActivity extends Activity implements CallbackListener<HueDiscov
 
 	    //noinspection deprecation - this method is ment for usage only here
 	    if (hGroup != null) {
-		    List<HueLight> currLights = hGroup.getLights();
+		    ArrayList<HueLight> currLights = new ArrayList<HueLight>(hGroup.getLights());
 		    if (currLights != null) {
-			    outState.putParcelableArray(Constants.PARCEL_KEY_LIGHTS, currLights.toArray(new HueLight[0]));
+			    outState.putParcelableArrayList(Constants.PARCEL_KEY_LIGHTS, currLights);
 		    }
 	    }
 	    super.onSaveInstanceState(outState);
